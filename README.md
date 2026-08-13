@@ -1,42 +1,40 @@
 # Applied AI Case Studies
 
-A curated collection of real-world **applied AI** case studies — each one a short,
-honest writeup of a problem, the approach taken, what worked, what didn't, and the
-measurable outcome.
+Tamás Nagy — full-stack and applied AI engineer, Budapest.
 
-The goal is *applied*: every case study focuses on shipping something useful, not on
-benchmarks for their own sake.
+I build multimodal AI systems that run in production against real users, and I spend most of my effort on the part that decides whether they work: knowing what to measure when there is no correct answer, and knowing which ideas to kill. Three write-ups, each covering one system — what the gap was between the ideal and what models could actually do, what got discarded, how quality was measured without ground truth, and what it cost.
 
-## Index
+Written for an applied AI role. Clients are named with permission; figures are the ones I can defend, and where a number is a proxy or an estimate I say so.
 
-| # | Case study | Domain | Outcome |
-|---|------------|--------|---------|
-| [0001](case-studies/0001-oldal-ai-website-builder/) | Oldal AI — AI Website Builder | Generative UI / design-to-code | Shipped to production |
-| [0002](case-studies/0002-cook-solutions-audio-detection/) | cook-solutions / "sear" — Cooking Detection from Audio | Audio signal processing | Prototype (pending kitchen data) |
+---
 
-_Add a row here each time you add a case study._
+### [01 — Encoding an Expert's Eye: Video Assessment for Hospitality Hiring](01-video-assessment.md)
 
-## Structure
+Reproducing a senior hospitality professional's judgment of a candidate from a 3–5 minute video: Japanese and English proficiency, keigo, bow, posture. Go and Python, with Gemini, Claude and Whisper.
 
-```
-case-studies/
-  NNNN-short-slug/
-    README.md      # the writeup
-    assets/        # images, charts, diagrams
-_template/
-  README.md        # copy this to start a new case study
-```
+*Demonstrates:* extracting an unarticulated expert standard into a specification; validation against real external ground truth (JLPT certification); designing a system that is forbidden by law from producing a verdict, and is better for it.
 
-## Adding a new case study
+### [02 — A Self-Improving Voice Agent With a Human Gate](02-voice-eval-system.md)
 
-1. Copy the template:
-   ```bash
-   cp -r _template case-studies/0002-your-slug
-   ```
-2. Fill in `case-studies/0002-your-slug/README.md`.
-3. Add a row to the **Index** table above.
-4. Open a PR (see [CONTRIBUTING.md](CONTRIBUTING.md)).
+An autonomous voice agent handling ~1,000 live property enquiry calls a month, with a weekly loop that proposed its own prompt, rule and knowledge base changes for human approval. ElevenLabs, n8n, Supabase, Next.js and Python.
 
-## License
+*Demonstrates:* building an evaluation harness rather than inheriting one; A/B testing conversational agents with a synthetic caller; treating model drift as a permanent condition to be managed rather than a bug to be fixed.
 
-Content and code in this repository are released under the [MIT License](LICENSE).
+### [03 — When the Right Answer Isn't a Model: A Deterministic Image Pipeline](03-deterministic-image-pipeline.md)
+
+Converting customer photographs into paintable images against a fixed palette of 806 real paints, selecting the paints that physically ship in the box. Pure Python, no model of any kind.
+
+*Demonstrates:* recognising when a generative approach is the wrong tool; expert-knowledge extraction at scale (2,000+ reviewed images); reducing a six-touchpoint manual process to one.
+
+---
+
+**Reading order.** They're numbered by relevance rather than chronology, and each stands alone. If you read one, read 01. If you read two, read 03 as well — it is the one where the answer was not to use a model.
+
+---
+
+## Also in this repo
+
+Two further project write-ups, drawn from working notes rather than written for this portfolio:
+
+- [Oldal AI — AI Website Builder](case-studies/0001-oldal-ai-website-builder/) — an AI website builder (intent / URL / Figma → editable structured model → WordPress export).
+- [cook-solutions / "sear" — Cooking Detection from Audio](case-studies/0002-cook-solutions-audio-detection/) — dependency-light cooking-event detection from audio (numpy STFT, no `librosa`).

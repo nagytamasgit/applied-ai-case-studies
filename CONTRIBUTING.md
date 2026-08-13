@@ -11,7 +11,7 @@ Case studies live under `case-studies/NNNN-short-slug/`.
 2. Write the study in that folder's `README.md`. Keep it honest — include what
    didn't work, not just the wins.
 3. Put images, charts, and diagrams in the study's `assets/` folder.
-4. Add a row to the **Index** table in the top-level [README](README.md).
+4. Link it from the top-level [README](README.md).
 5. Open a pull request.
 
 ## Style
