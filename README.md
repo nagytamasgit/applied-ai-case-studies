@@ -11,7 +11,8 @@ benchmarks for their own sake.
 
 | # | Case study | Domain | Outcome |
 |---|------------|--------|---------|
-| [0001](case-studies/0001-example-case-study/) | Example Case Study (template) | — | — |
+| [0001](case-studies/0001-oldal-ai-website-builder/) | Oldal AI — AI Website Builder | Generative UI / design-to-code | Shipped to production |
+| [0002](case-studies/0002-cook-solutions-audio-detection/) | cook-solutions / "sear" — Cooking Detection from Audio | Audio signal processing | Prototype (pending kitchen data) |
 
 _Add a row here each time you add a case study._
 
