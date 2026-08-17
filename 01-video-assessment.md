@@ -39,6 +39,8 @@ What survived was 8–12 metrics: a pose analyser, voice and tone analysis, and 
 
 **Expert calibration for everything JLPT couldn't cover.** Bow, stance, keigo appropriateness, and omotenashi bearing have no certificate. I wrote the initial rules — what counts as a bow, what the thresholds are — and then sat with a senior hotel worker and adjusted them against real examples until the system's observations matched what an experienced professional actually saw. That loop, my formalisation corrected by their tacit knowledge, is where the standard came from. It is also the part that could not have been done by prompting alone.
 
+**Deployment discipline.** Every deployment went through an automated test pipeline — the critical paths of the pipeline covered by automated tests, with schema validation on the structured outputs each stage passes to the next. A multi-stage system whose stages exchange structured data fails loudest at the seams, so the seams are where the checks live.
+
 **Production as the long test.** The system has run daily for over ten months without issues, on live candidate applications, at a client who continues to use it. Sustained production use on real applicants is a harder test than any offline benchmark, because every failure mode surfaces eventually.
 
 **What I did not measure, and should have.** I never quantified agreement between human reviewers on the subjective metrics — how often two senior hospitality professionals would score the same bow the same way. That number is the ceiling on what any system can achieve against those metrics, and without it the 85% figure lacks a denominator I can fully defend.

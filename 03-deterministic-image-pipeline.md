@@ -37,6 +37,8 @@ This is expert-knowledge extraction rather than metric optimisation. There is no
 
 **Comparison against the work it replaced.** The result eventually exceeded the designers' own manual output — with an honest caveat I would state in any interview: the designers were working under production time pressure, one order at a time, and the system was not. It doesn't beat an unhurried expert. It beats what an expert can produce in the time the business can afford, on every order, consistently. That is the comparison that matters commercially, and inflating it into "better than human designers" would be a misrepresentation.
 
+**Tests that determinism makes possible.** A deterministic pipeline is trivially testable — fixed input, expected output, no tolerance bands — and it was tested that way: automated tests over the critical paths, run on every deployment. Simple tests, but the kind a model-based approach could never have this cheaply, which is itself part of the argument for the architecture.
+
 **Rejection rate as the outside check.** The previous process already had a Python colour-matching component, so there was a real baseline. Customer rejections fell substantially against it — an outcome measured on people spending money, not on internal review.
 
 **The honest limits.** Monochrome and near-monochrome images are the hardest case, and were brought to acceptable rather than good; when the source has little chromatic range, a discrete palette has little to work with. And the system has only recently entered production — several thousand images with no issues so far is encouraging, not yet proven. The ten-month track record I'd want doesn't exist yet.
