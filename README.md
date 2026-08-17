@@ -2,7 +2,7 @@
 
 Tamás Nagy — full-stack and applied AI engineer, Budapest.
 
-I build multimodal AI systems that run in production against real users, and I spend most of my effort on the part that decides whether they work: knowing what to measure when there is no correct answer, and knowing which ideas to kill. Three write-ups, each covering one system — what the gap was between the ideal and what models could actually do, what got discarded, how quality was measured without ground truth, and what it cost.
+I build multimodal AI systems that run in production against real users, and I spend most of my effort on the part that decides whether they work: knowing what to measure when there is no correct answer, and knowing which ideas to kill. Four write-ups, each covering one system — what the gap was between the ideal and what models could actually do, what got discarded, how quality was measured without ground truth, and what it cost.
 
 Written for an applied AI role. Clients are named with permission; figures are the ones I can defend, and where a number is a proxy or an estimate I say so.
 
