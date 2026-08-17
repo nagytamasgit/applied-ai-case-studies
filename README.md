@@ -26,15 +26,12 @@ Converting customer photographs into paintable images against a fixed palette of
 
 *Demonstrates:* recognising when a generative approach is the wrong tool; expert-knowledge extraction at scale (2,000+ reviewed images); reducing a six-touchpoint manual process to one.
 
+### [04 — The Product Around the Model: OmotenashiJobs.jp End to End](04-omotenashijobs-product.md)
+
+The full platform around the pipeline in study 01, built solo from zero: candidate upload flow, employer dashboard, admin, design and deployment. Next.js, Node, PostgreSQL.
+
+*Demonstrates:* full-stack AI product engineering — the places where model output meets a user interface; rendering a legal constraint as a UI design; killing a revenue feature on legality grounds.
+
 ---
 
-**Reading order.** They're numbered by relevance rather than chronology, and each stands alone. If you read one, read 01. If you read two, read 03 as well — it is the one where the answer was not to use a model.
-
----
-
-## Also in this repo
-
-Two further project write-ups, drawn from working notes rather than written for this portfolio:
-
-- [Oldal AI — AI Website Builder](case-studies/0001-oldal-ai-website-builder/) — an AI website builder (intent / URL / Figma → editable structured model → WordPress export).
-- [cook-solutions / "sear" — Cooking Detection from Audio](case-studies/0002-cook-solutions-audio-detection/) — dependency-light cooking-event detection from audio (numpy STFT, no `librosa`).
+**Reading order.** They're numbered by relevance rather than chronology, and each stands alone. If you read one, read 01. If you read two, read 03 as well — it is the one where the answer was not to use a model. 01 and 04 are two halves of the same system: the model layer and the product built around it.
