@@ -35,3 +35,13 @@ The full platform around the pipeline in study 01, built solo from zero: candida
 ---
 
 **Reading order.** They're numbered by relevance rather than chronology, and each stands alone. If you read one, read 01. If you read two, read 03 as well — it is the one where the answer was not to use a model. 01 and 04 are two halves of the same system: the model layer and the product built around it.
+
+---
+
+## Wider engineering portfolio
+
+The four studies above go deep on single systems. [**PORTFOLIO.md**](PORTFOLIO.md) is the breadth behind them: an annotated index of 40 private repositories — 38 with shipped code — covering roughly the last year of work, from October 2025 onward.
+
+Multi-tenant SaaS, marketplaces, mobile apps published to Google Play, an AI website builder, a WordPress security platform, and the automation and content pipelines around them. Each entry states what the project is, the problem it solves, its stack and a real feature list, and says plainly whether it is in production, shipped to a store, built but undeployed, or archived.
+
+Those repositories are private because they contain client and commercial work. I'm happy to arrange a walkthrough or read-only access on request — client-owned code only with the client's consent.
