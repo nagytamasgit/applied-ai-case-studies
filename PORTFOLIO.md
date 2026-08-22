@@ -1,1061 +1,644 @@
-# Engineering Portfolio — Tamás Nagy
+# Engineering Portfolio
 
-**40 private repositories · 38 with shipped code · full-stack product engineering**
+**Scope:** 40 private repositories, 38 with shipped code, created between October 2025 and August 2026
+**Role:** Solo on all but two of them — architect, engineer, and in most cases the person who deployed it
+**Domains:** Multi-tenant SaaS, marketplaces, mobile apps and games, AI platforms, automation
+**Stack:** TypeScript/Next.js, Flutter/Dart, Python, PHP/WordPress, PostgreSQL, Docker on self-managed VPS
 
-**Scope: this is roughly the last year of work.** Every repository listed here was created between
-**October 2025 and August 2026** — an 11-month window. It is not a complete career history; it is
-what I have built recently, and mostly solo. Earlier work is not included.
-
-I build and ship complete products end to end: product definition, architecture, backend, frontend,
-mobile, infrastructure, deployment and store release. Most of the work below is **solo-built** and
-production-deployed, spanning multi-tenant SaaS, marketplaces, AI platforms, mobile apps and
-published games.
-
-The repositories are private because they contain client work and commercial products.
-**I'm happy to walk any company through a live demo or a read-only code review of any project here.**
-
-> **Request a demo or code access** — [nagytmas@gmail.com](mailto:nagytmas@gmail.com)
-> Tell me which project interests you and I'll arrange a screen-share walkthrough, a read-only
-> collaborator invite, or a sanitised code sample. Client-owned repositories require the client's
-> consent, which I'll obtain before sharing.
+An index of roughly the last year of building. The [four case studies](README.md) in this repository
+go deep on single systems and are the better read if you have twenty minutes. This document is the
+breadth behind them: what exists, what it was for, and what state it is actually in.
 
 ---
 
-## At a glance
+## What this document is, and what it isn't
 
-| | |
+It is an inventory with judgment applied, not a portfolio in the sense of selected highlights. Every
+repository I own from the period is here, including the abandoned ones and the duplicates, because a
+list that quietly omits its failures is not evidence of anything.
+
+**It is not a career history.** Eleven months, October 2025 to August 2026. Earlier work isn't here.
+
+**The case-study systems are not in this list.** The video assessment pipeline and the
+OmotenashiJobs platform covered in studies 01 and 04, the voice agent in 02, and the image pipeline
+in 03 are client-owned and live in repositories I don't hold. `jp-jobs` below is a *different*
+Japanese hospitality product and should not be mistaken for them. Two of the projects here do have
+their own case studies — Oldal and `sear` — and I've linked rather than repeated them.
+
+**Status words mean specific things**, and I have tried to use them honestly:
+
+| Word | What it actually means |
 |---|---|
-| **Repositories** | 40 private (38 with code, 2 empty placeholders) |
-| **Languages** | TypeScript (13), Python (7), Dart/Flutter (5), PHP (5), JavaScript (3), HTML (2), Shell, Blade, C# |
-| **Deployed to production** | 10+ (Hetzner, Coolify, GCP Cloud Run, Vercel, Render, Google Play, self-managed VPS) |
-| **Published to app stores** | 2 (Google Play production + internal testing tracks) |
-| **Largest single codebase** | 389 files, 20 DB migrations (Oldal AI website builder) |
+| **In use** | Real users or a paying client depend on it right now |
+| **Shipped** | Published to an app store and downloadable |
+| **Built** | Complete and verified against tests, but nobody outside has used it |
+| **Blocked** | Code-complete; waiting on a licence, a credential or a client decision |
+| **Research** | Deliberately unfinished — the point is the method, not a product |
+| **Archived** | Superseded or abandoned; listed for provenance |
 
-### Capability matrix
-
-| Area | Evidence in this portfolio |
-|---|---|
-| **Multi-tenant SaaS** | Oldal (agency→client→project RBAC), Sentinel (org scoping), XPRIZE (workspace RLS), NexusPress |
-| **AI / LLM engineering** | Anthropic Claude (streaming, vision, prompt caching, tool calls), Google Gemini, OpenAI, OpenRouter, local Ollama, output hardening, LLM-as-judge, cost metering & markup billing |
-| **Applied ML (non-LLM)** | `sear` — audio DSP cascade (log-mel STFT, onset detection, spectral features) with a frozen train/test split and an honest eval harness |
-| **Mobile** | Flutter (5 apps, iOS+Android, published), React Native/Expo, Unity/C# |
-| **Backend** | Next.js App Router, NestJS + Fastify, Hono, Laravel, Medusa, Firebase Cloud Functions, Supabase Edge Functions |
-| **Data** | PostgreSQL (Drizzle, Prisma), MySQL, SQLite, Firestore, Supabase, OpenSearch, Redis |
-| **Realtime** | Socket.IO rooms, Supabase Realtime, Firestore listeners |
-| **Payments & billing** | Stripe, RevenueCat, Google Play Billing 8, Számlázz.hu, Billingo, prepaid credit metering, on-chain USDT/USDC |
-| **Security** | HMAC request signing, AES-256-GCM at rest, scrypt/bcrypt, TOTP (RFC 6238), JWT, RLS tenant isolation, CSP injection, static JS scanners, rate limiting, append-only audit logs |
-| **Infrastructure** | Docker Compose, Caddy auto-TLS, Coolify, GCP Cloud Run + Cloud SQL, systemd, pg-boss/BullMQ workers, cron |
-| **E-commerce operations** | OpenCart 3 + Webkul Marketplace (seller settlement engine, commission netting, COD vs card reconciliation, invoice provider abstraction), Medusa, WooCommerce + Subscriptions |
-| **WordPress engineering** | Plugin development (agent, invoicing bridge, block injector), FSE theme generation, LearnDash LMS builds, containerised WP staging with backup/restore drills |
-| **Quality** | Playwright E2E, Vitest/Jest, Flutter widget+integration tests, custom verification harnesses, CI on GitHub Actions |
-| **Release engineering** | Codemagic, Fastlane-style Play publishing, staged rollouts, store listing automation |
+The distinction that matters most is **Built** versus **In use**. A lot of what follows is Built. A
+system that passes its own tests has proven considerably less than a system that has survived
+strangers, and I would rather say so than blur the two.
 
 ---
 
-## Table of contents
-
-1. [AI platforms & SaaS](#1-ai-platforms--saas)
-2. [Marketplaces & multi-sided platforms](#2-marketplaces--multi-sided-platforms)
-3. [Mobile apps & games](#3-mobile-apps--games)
-4. [Automation, pipelines & developer tooling](#4-automation-pipelines--developer-tooling)
-5. [Websites & client work](#5-websites--client-work)
-6. [Earlier work & experiments](#6-earlier-work--experiments)
-7. [Full repository index](#7-full-repository-index)
-
----
-
-## 1. AI platforms & SaaS
-
-### Oldal — AI website builder (multi-tenant SaaS)
-`app.oldal.ai` · TypeScript · pnpm monorepo · **the largest and most complete project here**
-
-**What it is.** A SaaS where agencies and their clients build production websites by prompting AI.
-Output is flat-file, host-anywhere HTML/CSS — deliberately *not* a CMS, so there is no WordPress
-attack surface to maintain.
-
-**The problem it solves.** Agencies spend the bulk of a small-site budget on build labour, then
-inherit a WordPress installation they must patch forever. Oldal collapses the build into a prompt
-and ships static output the client can host anywhere.
-
-**Stack.** Next.js 15 (App Router) · TypeScript · PostgreSQL + Drizzle (20 migrations) ·
-Anthropic Claude SDK (streaming, vision, prompt caching) · Hono form relay · Resend ·
-Tailwind 4 · Docker Compose + Caddy auto-TLS on a single VPS.
-
-**Features**
-
-- **Two generation modes sharing one set of rails.** *Agentic*: describe the site (optionally paste
-  a reference image) and Claude generates a bespoke multi-page site, refined by chat, exported as
-  a ZIP. *Template*: a structured `SiteModel` edited through validated AI tool calls and rendered
-  by a deterministic renderer — the AI never writes raw code, so preview == export by construction.
-- **Security hardening pipeline.** A capability policy (HTML+CSS / +JS / +PHP) is enforced *after*
-  generation: JS off means no `<script>` tags or inline handlers survive; generated JS is run
-  through a static scanner; a strict CSP is injected into every page. There is a dedicated
-  `verify-harden-bypass` suite that attacks its own hardener.
-- **Multi-tenant RBAC** — agency → client organisations → projects, with delegation, invites,
-  password reset, scrypt password hashing, session security and login rate limiting.
-- **Prepaid credit billing** — 1 credit = $0.01. Generation charges the *real* Claude API cost ×
-  a configurable markup; a finished site charges a one-time site fee on first export; generation
-  is gated on balance. Real-USD usage metering per client plus invoice totals in the billing UI.
-- **Background generation jobs** with a live progress UI and a generation watcher.
-- **Figma import** (per-org OAuth) and **clone-from-URL** — extract a design system from an existing
-  site or a Figma frame and rebuild it as a hardened static site.
-- **Hosted form relay** — exported static sites post to one hardened endpoint with spam filtering,
-  transactional email and a lead inbox back in the dashboard.
-- **WordPress export path** — render a `SiteModel` as a full-site-editing WP theme, plus a
-  WP orchestrator service for AI-operated managed hosting.
-- **Version history, media manager, design-token controls, block picker, canvas editor,
-  changelog feed, newsletter with double opt-in, admin console, public REST API (`/api/v1/sites`).**
-- **~200 assertions across 15 verification suites** (PGlite + mock LLM), so the whole platform can
-  be validated without touching a paid API.
-
-**Status.** Feature-complete for closed beta, fully verified, deployed to production on Hetzner.
-
----
-
-### XPRIZE — "AI business employee"
-`xprize` · TypeScript · npm workspaces · **live in production**
-
-**What it is.** An AI employee a small business hires for *outcomes* rather than for software
-features: **Booked** (fills the calendar), **Paid** (issues and chases invoices), **Found** (gets
-the business into AI answers and search).
-
-**The problem it solves.** Small service businesses don't want another dashboard to operate. They
-want the outcome. This system takes actions on their behalf, with every action gated by a human
-approval step and recorded in an immutable evidence trail.
-
-**Stack.** Next.js App Router · TypeScript · PostgreSQL (append-only event log + RLS) ·
-pg-boss worker · Google Gemini · Firebase Auth · GCP Cloud Run + Cloud SQL (europe-west4),
-later migrated to Coolify · Resend.
-
-**Features**
-
-- **Append-only event-log core.** Events are the source of truth; projectors materialise
-  bookings/leads/contacts read models. The `events` table rejects UPDATE and DELETE *even for the
-  service role*. Projections are idempotent on replay.
-- **Row-level-security tenant isolation** — a workspace can never read *or write* another
-  workspace's rows, proven by test.
-- **Approval queue with progressive autonomy** — every agent action runs propose → approve/reject →
-  execute, with per-workspace autonomy policies and idempotent execution.
-- **Loop A (Booked)** — a Gemini chat agent that reads owner constraints, time off and slot holds,
-  then books.
-- **Loop B (Paid)** — completed work → deterministic invoice → gated approval → connector issues it
-  (Számlázz.hu / Stripe / mock).
-- **Loop C (Found)** — grounded HU/EN content generation → LLM judge → gated publish → public site
-  with hreflang and FAQ/LocalBusiness structured data.
-- **Owner Assistant** — configure services, prices, packages, schedule, holidays and booking mode
-  purely by chat, all routed through Approvals.
-- **Agent-addressable entity API** (`/api/entity/<workspace>`) — live JSON of services, prices,
-  hours and real availability, designed to be consumed by *other* AI agents.
-- **Onboarding by archaeology** — point it at an existing website URL and it reconstructs a live
-  configured workspace.
-- **Owner email channel** with approval magic links and a daily brief; custom domain support;
-  embeddable chat widget; evidence export endpoint.
-
-**Status.** Live in production. All three loops working; inbox, Google Business Profile ingestion
-and the Stripe connector are the next increments.
-
----
-
-### Sentinel — WordPress security & operations platform
-`sentinel` · TypeScript · pnpm monorepo + PHP plugin
-
-**What it is.** A security and uptime platform for agencies that maintain fleets of WordPress
-sites — a dashboard plus a zero-dependency WordPress agent plugin.
-
-**The problem it solves.** Maintenance agencies manage dozens of client sites with no unified view
-of what changed, what's vulnerable or what's down. Sentinel gives one console over the fleet with a
-cryptographically authenticated channel to each site.
-
-**Stack.** Next.js 15 (App Router) · pg-boss worker · PostgreSQL 16 + Drizzle ·
-Zod · WordPress plugin in PHP 7.4+ with **zero dependencies** · Docker Compose / Coolify.
-
-**Features**
-
-- **Hardened wire protocol.** `HMAC-SHA256(secret, "{timestamp}.{nonce}.{raw_body}")` on every
-  request, ±300 s timestamp tolerance, single-use per-site nonces with worker-side pruning.
-- **Secrets at rest** — the per-site HMAC secret is stored AES-256-GCM encrypted server-side and
-  derived from `AUTH_KEY` on the WordPress side.
-- **One-shot pairing flow** — dashboard issues a single-use `pt_…` token; the pair response returns
-  the `site_key` + `hmac_secret` exactly once.
-- **Auth** — organisation signup, scrypt + database sessions, **TOTP two-factor (RFC 6238,
-  hand-implemented and unit-tested)**, org-level scoping throughout.
-- **Plugin agent** — pairing, heartbeat, event collection, command executor, file-integrity module,
-  secrets handling, admin UI.
-- **Command channel** — signed commands with a pending/result lifecycle.
-- **Credit accounting** and an audit log; E2E smoke test against a running server + database.
-
-**Status.** MVP complete and green — monorepo, data model, pairing, HMAC, heartbeat, event
-reporting, auth/TOTP, site detail views, E2E smoke. Uptime/SSL monitoring, Wordfence feed import
-and notification channels are the mapped next steps.
-
----
-
-### Hermes — autonomous agent operations
-`hermes-agent` + `hermes-dashboard` (org: `hermes-vps-agent`) · JavaScript / TypeScript
-
-**What it is.** A two-repository system for running an autonomous coding/ops agent on a VPS with a
-**human approval gate** in front of every merge and deploy.
-
-**The problem it solves.** Letting an agent act on real infrastructure is only safe if a human can
-see what it proposes, in context, and approve or reject it in one tap — from a phone.
-
-**Stack.** Next.js 14 · PostgreSQL · Docker · Tailscale-only network access ·
-OpenRouter LLM for intake parsing · GitHub API · n8n.
-
-**Features**
-
-- **Review queue** — every pending item shows task, project, colour-coded risk level, branch and
-  links to PR / staging / screenshots / test report, plus the model audit. Approve merges the PR,
-  labels it and records a deployment row; Reject closes it unmerged; Request changes posts a PR
-  comment.
-- **Conversational intake** — describe work in plain language; an LLM acting as an intake assistant
-  distinguishes chit-chat from build requests, asks *one* clarifying question when vague, then shows
-  a **task preview** that must be explicitly tapped to queue. A raw sentence can never launch the
-  runner on the wrong thing.
-- **Multi-chat sidebar** with rename/delete, per-chat persisted transcripts keyed by session.
-- **Task list + history** with status/priority filters; new tasks open a templated GitHub issue.
-- **Live health dots** for the WordPress sandbox and n8n, checked server-side.
-- **Agent side (`hermes-agent`)** — a task protocol driven by GitHub issues/labels, plus real
-  delivered work products: a WordPress FSE theme generator with a JSON design-spec translator and
-  `theme.json` v3 schema validation, an AI site builder with mechanical/visual/rubric QA scoring
-  calibrated against a deliberately-bad control site, and an n8n workflow factory that ships
-  evidence bundles (workflow sent → created → test results → execution records → LLM cost) for
-  every automation.
-
-**Status.** Working system with deployed dashboard and an evidence trail of completed agent runs.
-
----
-
-### NexusPress — AI WordPress block generation SaaS
-`aiwp2` · `aiwp-plugin` (companion plugin)
-
-**What it is.** A SaaS that generates brand-consistent WordPress Gutenberg blocks from a text
-prompt and injects them into a connected site in one click.
-
-**Stack.** Next.js 14 · TypeScript · Prisma + MySQL · Google Gemini · Stripe · JWT ·
-WordPress plugin (PHP 7.4+, GPL-2.0).
-
-**Features**
-
-- **Brand DNA** — per-account colours, fonts, voice tone and industry, applied to every generation
-  so output stays on-brand.
-- **Block types** — hero, features grid, CTA, pricing table and more.
-- **One-click injection** — the plugin exposes `POST /wp-json/ai-design/v1/inject`, authenticated
-  by JWT bearer token, and creates the page/post as a draft, returning edit and preview URLs.
-- **Multi-site support** — connect and manage several WordPress installations, with per-site secret
-  keys, regeneration and connection ping/testing.
-- **Billing** — pay-as-you-go credits or subscriptions via Stripe checkout, customer portal and
-  webhook handling (`checkout.session.completed`, subscription updated/deleted, invoice
-  succeeded/failed).
-- **Auth** — register/login/me, password reset request + confirm, JWT sessions.
-- **Generation history**, injection logs, onboarding flow, admin dashboard.
-- **Tested** — unit suites for JWT, password hashing, input sanitisation and validation schemas,
-  with coverage reporting.
-
-**Status.** Feature-complete build with a published companion plugin (v1.0.0) and a deployment
-pipeline for Hostinger.
-
----
-
-### sear — single-moment cooking coach (applied ML research)
-`cook-solutions` · Python · MIT licensed
-
-**What it is.** A deliberately narrow system that detects **one** cooking mistake — the pan wasn't
-hot enough when the food went in — within seconds, and coaches the correction while it can still
-be fixed.
-
-**Why it's interesting engineering.** It is a study in scoping and in honest evaluation. The core
-insight is that a cold pan is an **audio** problem, not a vision problem: a proper sear produces
-immediate broadband noise with a sharp onset, an under-temperature pan a weaker hiss that ramps.
-Audio is orders of magnitude cheaper than video, works when the cook's hand occludes the pan, and
-doesn't care about steam on the lens.
-
-**Stack.** Python 3.11 · numpy (hand-rolled STFT — no librosa) · OpenCV · `uv` · pytest · ruff.
-
-**Features**
-
-- **Three-tier cascade** where expensive components run rarely: Tier 1 always-on audio onset
-  detection (log-mel over a 1 s window) plus 2 fps frame differencing on the pan ROI; Tier 2
-  triggered ~10 ms classifier (`good_sear` / `pan_too_cold` / `ambiguous`) using band-energy ratio,
-  spectral flatness and attack slope; Tier 3 rare single LLM call producing one coaching utterance
-  under 20 words.
-- **Evaluation harness** that scores any classifier, with session-level 80/20 splits **frozen after
-  first run** and a held-out test split not examined until day 11 of the build.
-- **`SMOKE` session isolation** — throwaway clips used to test the ingest→label→split→harness
-  plumbing are structurally excluded from splits and eval runs so they can never contaminate real
-  numbers.
-- **A written `DECISIONS.md`** recording every idea that was *cut*, each with the condition that
-  would reopen it, and an `EVAL.md` with targets and an ablation against a naive
-  video-language-model baseline.
-- **White-balance drift experiment**, labelling tool, split generator, synthetic-signal test suite.
-
-**Status.** Days 1–7 code-complete and fully tested on synthetic signals, with the Tier 3 coach
-(provider, contract, cost accounting, event log) added since; blocked on kitchen recording time,
-not on code. Honest limits are documented in the README rather than hidden. `cookai` is the earlier
-weekend-scoped attempt at the same problem, kept for provenance.
-
----
-
-## 2. Marketplaces & multi-sided platforms
-
-### Grundi — greenfield marketplace
-`grundi-` · TypeScript · pnpm monorepo
-
-**What it is.** A full multi-vendor marketplace rebuilt from scratch: storefront, buyer account,
-seller portal and admin, on a typed contract-first backend.
-
-**Stack.** Next.js App Router (storefront/admin) · **NestJS + Fastify** REST API with OpenAPI docs ·
-BullMQ workers · Drizzle + PostgreSQL · Zod shared contracts · OpenSearch · MinIO · Redis · Mailpit.
-
-**Features**
-
-- **Six-package monorepo** — `apps/web`, `apps/api`, `apps/worker`, `packages/contracts` (shared Zod
-  contracts + event names), `packages/db`, `packages/ui`.
-- **Dual data store** — an in-memory store for fast local iteration and tests, and PostgreSQL as the
-  canonical production store; both share order numbering, moderation gating, payment/settlement
-  rules, session handling and SKU/slug constraints, with Postgres authoritative where they diverge.
-- **Seller lifecycle** — seller registration, product creation, moderation gating, settlement
-  generation.
-- **Buyer lifecycle** — catalogue search (OpenSearch-backed), cart, checkout, order pages, account.
-- **Workers** for imports, feeds, search indexing, invoices and shipping labels.
-- **RBAC + rate-limit guards + token service + Zod validation pipe** across the API surface.
-- **Tested** — auth core, checkout ordering, import validation, product workflow, settlement
-  generation, catalogue search and contract tests.
-
-**Status.** Web wired to the API; backlog and status tracked in-repo.
-
----
-
-### Ingatlanspanyol — Costa del Sol property search
-`IngatlanSpanyol/ingatlanspanyol` (canonical, v1.6.4) · TypeScript
-
-**What it is.** A trilingual (EN/ES/HU) property search platform for the Spanish Costa del Sol
-market, syncing listings from an upstream Supabase feed into its own PostgreSQL.
-
-**Stack.** Next.js 16 App Router · next-intl · Drizzle + PostgreSQL · Supabase client (source feed) ·
-Google Maps JS API · Playwright + Vitest · Docker multi-stage + Coolify · Plausible.
-
-**Features**
-
-- **Localised routing** for three languages with locale-aware sitemaps, robots, manifest, hreflang
-  alternates and legal pages (`aviso-legal`, privacy, terms).
-- **Property search** — filter form with location autocomplete, type dropdown, beds/baths dropdown,
-  results toolbar, pagination, skeleton loading states and reveal-on-scroll.
-- **Property detail** — image gallery, map, sticky header, share buttons, scroll-to-contact and a
-  contact form.
-- **Ingestion pipeline** — an admin-secret-protected `POST /api/admin/sync` plus a `sync_runs` audit
-  table and `GET /api/admin/sync-runs` history; scheduled post-deploy sync runner that calls the app
-  on localhost to avoid the reverse-proxy hairpin problem.
-- **Admin auth hardening** — shared-secret header, optional IP allowlist, explicit
-  `TRUST_PROXY_HEADERS` opt-in.
-- **A companion WordPress plugin** so the search can be embedded into an existing WP site.
-- **Tested** — Vitest units for admin auth, property queries and the sync runner; Playwright smoke.
-
-**Status.** Deployed via Coolify with scheduled sync. *(`nagytamasgit/ingatlanspanyol` is an earlier
-snapshot of the same codebase at v0.4.7.)*
-
----
-
-### Eutory — European brand directory & comparison platform
-`eutory` (platform) + `eutory-collector` (content pipeline)
-
-**What it is.** A directory, deals and comparison site for European brands and services, with a
-company self-service portal and a separate AI research pipeline that drafts its content.
-
-**Stack (platform).** Next.js 16 · Prisma 7 + PostgreSQL · NextAuth · Playwright E2E ·
-Docker multi-stage with healthcheck · nodemailer.
-**Stack (collector).** Python 3.11 · Typer CLI · trafilatura + DuckDuckGo search · OpenAI-compatible
-LLM client (incl. local Ollama) · Docker / Coolify.
-
-**Platform features**
-
-- **Content model** — brands, categories, countries, deals, posts, comparisons and comparison
-  features, driven by a versioned content contract (v2) with localised fields.
-- **Public surface** — directory (by category / country / tag / type), deals with redirect tracking,
-  blog, comparison pages including head-to-head `compare/vs/[brand]`, calculators workbench,
-  "why European" and verification pages.
-- **Company dashboard** — self-service brand editing, deal management, profile and password.
-- **Brand submission wizard** for unclaimed brands, with a draft-approval queue.
-- **Admin CMS** — generic resource editor over every content type, analytics (traffic, SEO,
-  incidents overview), API-key manager with scopes, calculator studio.
-- **Public REST API** (`/api/v1/*`) with scoped API keys, bulk import and media import.
-- **SEO** — JSON-LD, dynamic OG image route, alternates/hreflang, sitemap, robots, 404 tracking.
-- **Analytics & monitoring** — first-party page-view and not-found tracking, uptime monitor tick
-  with alerting, scheduled SEO audit script.
-- **Security** — email verification with hashed tokens, rate limiting, request-security and
-  env-security modules, audit log, dedicated DB-role SQL, a documented hardening pass.
-- **Playwright E2E** across auth, brand flows, listings, navigation and API smoke.
-
-**Collector features**
-
-- Gathers research for a brand/category/country/deal/post/comparison, biased toward official sites,
-  public docs, pricing and legal pages, Wikipedia and EU public pages.
-- Synthesises a draft content JSON document against the canonical contract, then **validates** it —
-  required fields, enums, ISO dates, URL shapes, locale codes, canonical category slugs, GEO objects
-  and unresolved placeholders.
-- **Never invents database IDs**: foreign keys stay placeholders until resolved from a local mapping
-  file, with a separate `resolve-ids` post-processing step.
-- Emits a full artefact bundle per run (`research.json`, `job.json`, `generated.json`,
-  `validation.json`, `source-notes.json`).
-- Ships n8n workflow definitions for discover / enrich / sync-pull / sync-push, plus an HTTP
-  smoke-test mode with optional API-key hardening.
-
----
-
-### SoforApp — ride-hailing with a partner-bidding model
-`soforapp` · NestJS + Flutter × 2
-
-**What it is.** A three-part ride-hailing MVP where passengers request a ride and **transport
-companies bid** for it, rather than a single algorithmic dispatch.
-
-**Stack.** NestJS + Prisma + PostgreSQL · Socket.IO · Redis · Flutter passenger app ·
-Flutter partner/driver app · Docker Compose · Codemagic CI.
-
-**Features**
-
-- **Full ride lifecycle** — request → broadcast to partners → bids → passenger accepts → partner
-  assigns driver → en-route → in progress → completed → rating, with state-machine validation at
-  each transition.
-- **Bidding engine** — one bid per company per ride, rejection of bids on closed rides, and a
-  wallet guardrail requiring a company to hold at least `bid + 2000` before bidding.
-- **Wallet system** — balance, deposits, commission withdrawal, full transaction history.
-- **Realtime** — room-based Socket.IO events per company (`company_<id>`) and per ride
-  (`ride_<id>`): new request, new bid, bid accepted, driver assigned, ride started/completed and
-  live driver location.
-- **Team & fleet management** — teams, driver activation flow with OTP, RBAC, driver documents,
-  fleet map, dispatch messaging, ride conversations, company ride history and stats.
-- **Payments & invoicing** — Stripe, company payment methods, Billingo invoicing provider with a
-  retry service, reconciliation service and a country-specific billing policy module.
-- **Passenger app** — destination selection, weather preview for the destination (Open-Meteo), live
-  bid list, ride tracking with driver location, completion rating.
-- **Tested** — unit specs across auth, wallet, invoicing, payments and the events gateway, plus an
-  end-to-end simulation spec.
-
-**Status.** End-to-end flow working locally with seeded test accounts; deployment, Adyen and release
-prep documented in-repo.
-
----
-
-### Japan hospitality job board
-`jp-jobs` (v3.6.49, the live platform) · `jp-hospitality-import-jobs` (PHP importer) ·
-`hostjobs` (WordPress predecessor)
-
-**What it is.** A bilingual job marketplace connecting foreign candidates with Japanese hospitality
-employers, including the visa and Japanese-résumé workflows that make that market specific.
-
-**Stack.** Next.js 16 · TypeScript · Prisma + PostgreSQL (12 migrations) · NextAuth v5 ·
-next-intl · Anthropic + OpenAI SDKs · Stripe · Tiptap editor · Leaflet maps · Playwright E2E ·
-Vitest · Docker · gitleaks in CI.
-
-**Features**
-
-- **Three role surfaces** — candidate, employer and admin, each with its own layout and dashboard.
-- **Candidate** — profile, applications, saved jobs, documents (with private-storage migration),
-  notifications, visa details, discoverability controls, linguistic profile and talent-intent.
-- **Shokumu keirekisho** — generation, translation and PDF export of the Japanese-format career
-  history document, with usage metering.
-- **Employer** — onboarding, job posting with validation, applicants table, application detail and
-  status actions, candidate discovery marketplace, Stripe checkout with success/cancel flows,
-  notifications, company profile and branding (brand assets, slogans, follow model).
-- **Admin** — job moderation and approval, payment confirmation, job sync and self-import, user and
-  role management, visa cases with assignment, lawyer role, blog posts with translations,
-  subscribers and waiting-list export, audit logs.
-- **Job search** — full search, map view (Leaflet), company directory, expired-jobs handling and an
-  indexed jobs schema tuned for query performance.
-- **Content** — multilingual blog with per-locale translations, industry insights, FAQ (candidate and
-  employer), guides.
-- **Ops** — security rate-limit event tracking, performance budget checker, translation script,
-  production migration runner, cron setup, custom `server.js`.
-- **Tested** — Playwright specs for job search, application flow, candidate dashboard, employer
-  experience and company directory.
-
-**Related repos.** `jp-hospitality-import-jobs` is the standalone PHP job-feed importer (fetch,
-enrich, bulk import, logo repair, WordPress integration) that seeded the board.
-`hostjobs` is the earlier full WordPress implementation (Blocksy + FluentCRM/Forms/Cart/Boards,
-ACF Pro, iThemes Security Pro) with a custom `cron_import.php` feed importer.
-
----
-
-### EuroSzaki — skilled-trades job board for Western Europe
-`euroszaki` · PHP / Laravel + Blade
-
-**What it is.** A job board connecting skilled tradespeople with employers in Germany, Austria and
-the Netherlands.
-
-**Stack.** Laravel · Blade · Filament admin · Laravel Cashier (subscriptions) · MySQL.
-
-**Features**
-
-- **Listings** with tags, filters, pricing tiers, upsells, checkout fields and payment fields.
-- **Candidate profiles** and applications; company profiles; conversations and messages.
-- **Automated job import** — Apify/Indeed service, generic import service, auto-import and
-  expiration-check console commands, import statistics dashboard, a documented skilled-trades import
-  guide.
-- **AI translation service** plus a general translation service and a translation-migration command,
-  for a fully localised interface.
-- **Résumé parsing service** for uploaded CVs.
-- **Marketing automation** — newsletter subscribers, email campaigns (Filament-managed), weekly job
-  digest command, and a Facebook Page posting command.
-- **Click tracking** with tracking fields, for attribution on outbound listing clicks.
-- **Social auth** alongside standard Laravel auth (login, registration, password reset, confirm).
-- **Filament admin resources** for listings, posts, users, campaigns and subscribers.
-
----
-
-### Webautomatizáció — productised automation agency shop
-`webautomatizacio` · TypeScript · pnpm monorepo
-
-**What it is.** A Hungarian automation agency storefront that sells **productised n8n workflows** as
-catalogue items, with a deliberately manual invoice flow instead of card payments.
-
-**Stack.** Next.js App Router (Hungarian storefront) · **Medusa** commerce backend with a custom
-module · PostgreSQL · Puppeteer (offer PDFs) · Docker Compose + Caddy + systemd · Coolify.
-
-**Features**
-
-- **Custom Medusa module** (`automation-request`) with models for automation requests, customers,
-  descriptions, offers and knowledge articles, plus seven migrations.
-- **Quote-to-onboarding pipeline** — visitor submits an audit or order request → admin reviews →
-  offer is generated, previewed, rendered to PDF and sent → approved → invoice marked → onboarding
-  form issued to the customer at a tokenised URL.
-- **Admin surfaces inside Medusa** for requests (with read-status and status transitions), customers,
-  automation descriptions and knowledge articles, plus a product widget for public sections.
-- **SEO landing pages** per automation category — n8n automation, CRM, lead, invoicing, reporting,
-  webshop, AI chatbot for webshops — with a knowledge base, ROI calculator and pricing pages.
-- **Deliberate payment stance** — "payment by invoice", no card form and no Stripe in the MVP;
-  documented as a security decision, with honeypot + server-side validation + rate limiting on all
-  public forms.
-- **Legal pages** (ÁSZF, privacy, cookie policy, impressum) and cookie consent.
-
----
-
-### Grundi (OpenCart) — the live marketplace, rebuilt and hardened
-`grundi-opencart` · PHP · OpenCart 3.0.3.8 + Webkul Marketplace + Journal3 · **live at grundi.hu**
-
-**What it is.** The production grundi.hu store: a working copy of the real multi-vendor OpenCart
-installation, brought under version control, security-reviewed, containerised for local
-development and extended across ten delivery phases. (Distinct from `grundi-`, the greenfield
-Next.js/NestJS rebuild of the same business.)
-
-**The problem it solves.** An inherited production marketplace with no version control, no local
-environment and no seller-payout logic. The work turned it into a reproducible, auditable system a
-team can safely change.
-
-**Stack.** PHP 7.4 · MariaDB · OpenCart 3.0.3.8 · Webkul Marketplace · Journal3 theme ·
-rootless Podman (PHP+Apache+MariaDB) · Caddy · Docker Compose deploy with runbook, backup script,
-healthcheck and cron.
-
-**Features delivered**
-
-- **Phase 0 — reproducibility and security.** Repo brought under git with secrets and runtime junk
-  gitignored; a full security pass with every finding triaged and remediated, documented in a dated
-  in-repo review; full containerised dev stack so the store boots from `bash dev/setup.sh`.
-- **Phase 1 — settlement engine.** Per-seller, per-period netting of **card (marketplace-collected)
-  against COD (seller-collected)** revenue with shortfall billing. Built as a pure, unit-tested
-  calculator over idempotent `grundi_settlement*` tables, with admin generate/approve/pay screens
-  and a seller-facing statement. Verified against real production data.
-- **Phase 2 — settlement invoicing.** A provider abstraction over **Számlázz.hu Agent-XML** and
-  **Billingo v3** with dry-run mode, per-seller API keys, and the three spec outcomes
-  (commission / payout+notify / shortfall+notify) plus batch issue.
-- **Phase 3 — payments.** Per-seller payment-method toggle enforced at checkout through OpenCart
-  events; SimplePay integration prepped end to end.
-- **Phase 4 — access control.** Two scoped admin roles, strong-password policy for admins and
-  customers, email verification on registration.
-- **Phase 5 — catalogue integrations.** Admin-configurable feed banned-words, XLSX import, and an
-  idempotent outbound stock-decrement webhook per seller on paid orders.
-- **Phase 6 — support.** In-house ticketing for customers and an admin/support queue, seller review
-  replies, native newsletter.
-- **Phase 8 — lifecycle email (Hungarian).** Weekly/monthly seller summaries, event-driven
-  first-sale congratulations, milestone incentives, admin digests and coupon campaigns with dry-run.
-  Delivery is **at-most-once**, guarded by `grundi_notify_log` rows, behind a token-guarded daily
-  cron endpoint. 34 unit checks plus an end-to-end run against a real database.
-- **Phase 9 — carrier integrations** built; **Phase 10 QA** cleared twice.
-- **Security review** (dated, in-repo) with findings split into fixed / confirmed-clean /
-  accepted-open, plus ops hardening. Buyer-identifying shipping documents are explicitly gitignored
-  as PII.
-
-**Status.** Live on a Hetzner VPS. Everything not blocked on the client is finished; the remaining
-items need carrier credentials, production SMTP, SimplePay contracts and legal sign-off.
-
----
-
-### Anfisa Beauty — GetCourse replacement (WordPress)
-`getcourse` · PHP / WordPress · Shell tooling · **deployed to VPS staging**
-
-**What it is.** A self-owned WordPress/WooCommerce/LearnDash platform replacing a client's rented
-GetCourse online school — a subscription wellness business (face yoga, massage, meditation,
-nutrition, skincare).
-
-**The problem it solves.** The client's courses, members and payments lived inside a closed
-third-party platform they neither owned nor could extend. This migrates the whole business onto
-infrastructure they control, without losing the course, membership or booking features.
-
-**Stack.** WordPress · WooCommerce 10.9 · WooCommerce Subscriptions · LearnDash · Amelia booking ·
-Fluent Forms · TranslatePress · Bunny Stream · Podman local stack · Docker + Caddy on a VPS ·
-Playwright smoke suite.
-
-**Features**
-
-- **Reproducible environments first.** A `stack.sh` harness gives `up / down / destroy`, arbitrary
-  WP-CLI passthrough, `backup`, and a **`restore-drill`** that proves the latest backup actually
-  restores by standing it up on a scratch stack on another port. Site install and eight test
-  personas are seeded idempotently.
-- **Playwright smoke suite as the deploy gate** — every phase adds specs; green is required before
-  any deploy.
-- **Phase 1 — commerce core.** Products, coupons, EU €5 / worldwide €15 shipping zones, classic
-  cart and checkout, COD placeholder gateway, mail logging for email verification.
-- **Phase 2 — LMS.** LearnDash courses, lessons and progression.
-- **Phase 3 — membership + trial** via WooCommerce Subscriptions.
-- **Phase 5 — booking.** Amelia appointments (Zoom pending client credentials).
-- **Phase 6 — funnel.** Fluent Forms gated webinar and assessment flows.
-- **Phase 7 — bilingual EN/HU** chrome and flows via TranslatePress.
-- **Phase 4 — video gating layer** code-complete against Bunny Stream.
-- **Deployment** to a VPS staging environment behind Caddy with nightly backups, plus a documented
-  phase-by-phase status file that separates "done" from "blocked on the client".
-
-**Status.** Phases 0–3 and 5–7 done on VPS staging with a green smoke suite; Phase 4 code-complete.
-Remaining blockers are commercial, not technical — Stripe keys, plugin licences, a Bunny account,
-Zoom credentials and GetCourse admin access for the content migration.
-
----
-
-### Tripora — trip-plan marketplace (React Native)
-`tripora` · React Native / Expo
-
-**What it is.** A cross-platform mobile marketplace for buying premade multi-day trip itineraries,
-with an AI trip generator and subscriptions.
-
-**Stack.** React Native + Expo 54 · TypeScript · Supabase (Postgres, Auth, Storage, Edge Functions) ·
-Stripe React Native · React Navigation · i18next (7 languages) · react-native-maps.
-
-**Features**
-
-- **Marketplace** with search, filter modal, favourites and reviews; trip detail with image gallery;
-  day-by-day itinerary view; activity detail with maps.
-- **AI generator + questionnaire + "plan my trip"** flows for bespoke itineraries.
-- **Subscriptions** — plans screen, management screen, value calculator, Stripe Edge Functions for
-  create / cancel / resume plus a webhook proxy and subscription webhook.
-- **Purchases** with a secured purchases table and payment-update fix path.
-- **Completion tracking** — mark activities done, resume where you left off.
-- **Offline support** — network-status hook, offline banner, trips cache service, cached images.
-- **Extras** — calendar sync, push notifications, trip sharing with shared-trips screen, social
-  sharing, dark mode, skeleton loading, image optimisation pipeline, 7-language localisation.
-
----
-
-## 3. Mobile apps & games
-
-### Lumino Block Puzzle — published Android game
-`toms-blocks` · Flutter · **v4.52.2 (build 156) live at 100% on Google Play production**
-
-**What it is.** A polished, heavily featured block-puzzle game with cloud save, leaderboards, IAP
-and a live-ops content calendar. The most commercially mature app in this portfolio.
-
-**Stack.** Flutter · Riverpod · GoRouter · Firebase (Auth, Firestore, Analytics, App Check) ·
-Google Mobile Ads · RevenueCat · Google Play Billing 8.3 · flutter_soloud · Sign in with Apple ·
-Codemagic CI.
-
-**Features**
-
-- **Multiple game modes** behind a `GameModeStrategy` abstraction, including a full **hexagonal
-  board** implementation (own coord system, grid, clear detection, piece model and renderer)
-  alongside the classic square board.
-- **Puzzle campaign** — puzzle packs, stages, sessions, a **solver** used to validate that puzzles
-  are actually solvable, a progress map screen and a remote pack source.
-- **Live-ops content** — daily challenges, weekly challenges, monthly challenges, daily login
-  rewards and achievements, each with its own controller and test suite.
-- **Economy** — coins, boosters (with a purchase sheet and catalogue), bundles, shop, free-coin
-  loops, rewarded ads and a **purchase ledger** with account-isolation tests.
-- **17 distinct clear effects** (confetti, dissolve, domino, fireworks, freeze, glitch, laser,
-  lightning, magnet, particles, shatter, slide, vortex …) behind a catalogue + factory, with a
-  live preview widget.
-- **Theming** — unlockable themes, seasonal themes, palettes, glass board rendering, texture cache
-  and custom painters.
-- **Cloud sync + leaderboards + accounts** (Google, Apple), with account-isolation guarantees.
-- **11 languages / 12 locales** — EN, HU, DE, ES, FR, IT, JA, NL, PL, PT (+ PT-BR), ZH.
-- **43 test files** covering engine, board, grid, pieces, hex, modes, scoring, serialisation,
-  rotation/game-over edge cases, second chance, challenges, achievements, purchases and UI.
-- **Store automation** — a `store_design` HTML→screenshot pipeline, capture scripts for store art
-  and IAP shots, and a Play internal-track publish script.
-
-**Status.** Shipped and monetising. Billing 8 migration promoted to 100% production, meeting
-Google's deadline.
-
----
-
-### Lumino Rush — arcade spin-off
-`lumino-rush` · Flutter · **published to Google Play internal testing**
-
-**What it is.** A time-pressure arcade variant of the block-puzzle core, built as a six-milestone
-brief with a rhythm mode prototype.
-
-**Stack.** Flutter · shared_preferences · audioplayers · RevenueCat.
-
-**Features**
-
-- **Rush engine** — separate from the Lumino engine: zones, objectives, a tray planner, tier table
-  and level definitions.
-- **BEAT mode** — a conveyor/rhythm prototype where the board is tapped on the beat, with its own
-  screen and test coverage.
-- **Level select + campaign progression**, shop, themes, sound service and monetisation hooks.
-- **Remote config** for tuning economy and difficulty without a release.
-- **Accessibility** — colour-blindness test coverage.
-- **9 test files** across the engine, tray planner, beat mode, pause, polish, remote config and
-  colour-blindness.
-- **Tooling** — a music generator, a Play listing script, screenshot capture tooling and a
-  `.claude` skill for driving the app during development.
-
----
+## 1. Things real people use
+
+### Lumino Block Puzzle
+
+**Repository:** `toms-blocks`
+**Status:** In use — v4.52.2 (build 156), Google Play production at 100% rollout
+**Role:** Solo
+**Stack:** Flutter, Riverpod, Firebase (Auth, Firestore, Analytics, App Check), Google Mobile Ads, RevenueCat, Play Billing 8.3
+
+The most commercially real thing here: a block-puzzle game with a live-ops content calendar, an
+in-app economy and paying users, in 11 languages across 12 locales.
+
+The engineering interest is in the parts that aren't the game. A `GameModeStrategy` abstraction
+carries several modes including a complete hexagonal board — its own coordinate system, grid, clear
+detection and renderer, sharing nothing with the square board but the interface. The puzzle campaign
+ships a **solver**, used not to help players but to prove at build time that a hand-authored puzzle
+is actually solvable, which is the kind of check that costs a day and saves a support inbox. The
+economy keeps a purchase ledger with account-isolation tests, because the failure mode of getting
+that wrong is refunding strangers.
+
+43 test files cover the engine, hex geometry, scoring, serialisation, rotation edge cases,
+challenges, achievements and purchases. The Play Billing 8 migration was promoted to 100% ahead of
+Google's August 2026 deadline.
+
+The honest caveat: I can tell you the code is well covered and the migration landed on time. I have
+not put retention or ARPU figures in this document because I would rather omit a number than publish
+one I can't source cleanly.
+
+### Grundi — the live OpenCart marketplace
+
+**Repository:** `grundi-opencart`
+**Status:** In use — live at grundi.hu on a Hetzner VPS
+**Role:** Solo, on an inherited codebase
+**Stack:** PHP 7.4, MariaDB, OpenCart 3.0.3.8, Webkul Marketplace, Journal3, rootless Podman, Caddy
+
+A multi-vendor marketplace I did not build and then had to make safe to change. It arrived with no
+version control, no local environment, and — the reason the client called — no way to work out what
+to pay its sellers.
+
+Phase 0 was unglamorous and mattered most: the store under git with secrets and runtime artefacts
+excluded, a dated security review with every finding triaged and remediated, and a containerised dev
+stack so the whole thing boots from one command instead of existing only in production. You cannot
+responsibly change a system you cannot reproduce.
+
+The substantive work is the **settlement engine**. Sellers collect cash on delivery; the marketplace
+collects card payments; the two have to be netted per seller per period, with shortfalls billed
+back. I built it as a pure calculator with unit tests over idempotent tables, then verified it
+against real production data before it was allowed near a payout. On top of that sits an invoicing
+abstraction over Számlázz.hu Agent-XML and Billingo v3 with a dry-run mode, per-seller payment
+toggles enforced at checkout, XLSX catalogue import with an idempotent stock-decrement webhook, an
+in-house support ticket queue, and Hungarian lifecycle email that is **at-most-once by construction**
+— guard rows in the database rather than a hope that cron doesn't double-fire.
+
+Ten phases delivered, two QA passes cleared. What remains is not code: carrier credentials,
+production SMTP, a SimplePay contract and legal sign-off all sit with the client.
+
+### Anfisa Beauty — replacing a rented platform
+
+**Repository:** `getcourse`
+**Status:** In use — VPS staging, migration pending
+**Role:** Solo
+**Stack:** WordPress, WooCommerce, WooCommerce Subscriptions, LearnDash, Amelia, Fluent Forms, TranslatePress, Podman, Caddy, Playwright
+
+A subscription wellness school — face yoga, massage, meditation, nutrition — moving off GetCourse
+onto infrastructure the client owns. The product requirements are unremarkable; what I would point
+at is the harness.
+
+`stack.sh` gives up, down, destroy, arbitrary WP-CLI passthrough, backup, and **`restore-drill`** —
+a command that takes the latest backup and proves it restores by standing the whole site up on a
+scratch stack on another port. An untested backup is a belief, not a backup, and for a business
+whose entire course catalogue and membership base lives in one database that distinction is the
+whole job. A Playwright smoke suite gates every deploy; each phase adds specs to it.
+
+Phases 0–3 and 5–7 are done on staging: commerce, LMS, memberships and trial, booking, funnel forms,
+EN/HU. Phase 4 video gating is code-complete. Everything still open is commercial rather than
+technical — Stripe keys, three plugin licences, a Bunny account, Zoom credentials, and GetCourse
+admin access before content can be migrated. I've kept those listed as blockers rather than quietly
+calling the project finished.
+
+### Oldal — AI website builder
+
+**Repository:** `app.oldal.ai` · marketing site `oldal.ai`
+**Status:** In use — production on Hetzner
+**Role:** Solo
+**Stack:** Next.js 15, PostgreSQL + Drizzle (20 migrations), Anthropic Claude, Hono, Docker + Caddy
+
+**Covered in depth in [case study 0001](case-studies/0001-oldal-ai-website-builder/README.md)** — a
+multi-tenant builder where agencies and clients produce hardened static sites by prompting, with a
+structured `SiteModel` intermediate representation, click-to-edit direct manipulation, ingestion from
+intent, a URL or Figma, and export to a real WordPress FSE theme.
+
+What the case study doesn't dwell on, and belongs in an engineering index: the output is put through
+a capability policy *after* generation — JavaScript off means no `<script>` tags or inline handlers
+survive, generated JS goes through a static scanner, and a strict CSP is injected into every page.
+There is a `verify-harden-bypass` suite whose only job is to attack the hardener. Billing meters the
+real Claude API cost per generation and charges it on with a markup against a prepaid balance, which
+means the cost accounting had to be correct before the product could be sold at all. Roughly 200
+assertions across 15 verification suites run against PGlite and a mock LLM, so the platform can be
+validated end to end without spending money.
+
+### XPRIZE — an AI employee with an approval gate
+
+**Repository:** `xprize`
+**Status:** In use — production, Cloud Run then Coolify
+**Role:** Solo
+**Stack:** Next.js, PostgreSQL append-only event log, pg-boss, Google Gemini, Firebase Auth
+
+A system a small business hires for outcomes rather than features: fill the calendar, issue and
+chase invoices, become findable. Three loops, each ending in an action taken on the business's
+behalf — which is precisely why none of them execute unsupervised.
+
+The core is an append-only event log with projectors materialising read models. The `events` table
+rejects UPDATE and DELETE **even for the service role**, projections are idempotent on replay, and
+row-level security is proven by test to stop a workspace reading *or writing* another's rows. Every
+agent action runs propose → approve/reject → execute with per-workspace autonomy policies, and the
+whole approval history is the evidence trail.
+
+The design decision I'd defend hardest is the **agent-addressable entity API** — live JSON of
+services, prices, hours and real availability at a stable URL, built to be consumed by other AI
+agents rather than by a browser. Onboarding works by archaeology: point it at an existing website
+and it reconstructs a configured workspace.
+
+This one shares a shape with the voice agent in [case study 02](02-voice-eval-system.md) — a system
+fully capable of running autonomously, with the switch deliberately left off.
 
 ### Cossy — social network for cosplayers
-`cossy` · Flutter + Supabase · **v1.0.0+21 on Google Play internal track**
 
-**What it is.** A mobile-first social network for cosplayers with the whole cosplay-creation toolkit
-built in — built solo for RevenueCat Shipaton 2026.
+**Repository:** `cossy`
+**Status:** Shipped — v1.0.0+21, Google Play internal track
+**Role:** Solo, for RevenueCat Shipaton 2026
+**Stack:** Flutter, Supabase (EU) with 30 migrations and 8 edge functions, RevenueCat, Cloudflare R2, ONNX moderation, OneSignal, Sentry, PostHog
 
-**Stack.** Flutter · Supabase (Postgres, Auth, Realtime, Storage — EU region) with **30 SQL
-migrations** and **8 Edge Functions** · RevenueCat (premium + coins) · Cloudflare R2 (media) ·
-self-hosted ONNX moderation · OneSignal · Sentry · PostHog · Codemagic.
+A social network with the cosplay-making toolkit built in: feed, profiles, WIP posts, DMs and group
+chat, a project tracker with nested checklists and budgets, conventions, and a coins economy where
+users award each other.
 
-**Features**
+Three things I'd single out. Moderation is self-hosted ONNX rather than an API, because a social app
+that pays per image to a moderation vendor has its costs coupled to its growth in the wrong
+direction. Account deletion is a first-class edge function, not a support email. And there is a
+dated security audit in the repository alongside dedicated hardening migrations and an explicit RPC
+surface migration — written when the app was small, which is the only time that work is cheap.
 
-- **Social core** — chronological feed with seen-tracking and discovery ranking, creator profiles,
-  WIP/activity posts, media upload via signed URLs, tags and leaderboards.
-- **Cosplan project tracker** — nested checklists, budgets and reference images per costume build.
-- **Chat** — DMs, group chat, topic rooms, room-creation RLS policies.
-- **Events** — convention listings, "met at con" connections, QR scanning, packing sheets.
-- **Coins economy** — awards sent between users, supporter spotlight, a paid Coins currency and a
-  premium subscription, both through RevenueCat with a webhook-driven entitlement sync.
-- **Moderation** — an admin moderation queue plus self-hosted ONNX-based content moderation.
-- **Notifications** — per-category preferences, push service, OneSignal tag sync and a weekly digest
-  function.
-- **Bilingual** EN/JA, including localised Play Store listings.
-- **Security** — a dated security audit in-repo, dedicated hardening migrations and an explicit RPC
-  surface migration.
-- **Account deletion** as a first-class Edge Function, plus community guidelines and DMCA policy.
-- **Seeding tooling** — demo and launch seeders in Python and SQL, with matching cleanup scripts.
+Honest position: it is on an internal track with seeded launch content, not a live community. The
+engineering is real; the audience is not there yet.
 
----
+### Ingatlanspanyol — Costa del Sol property search
 
-### Country Guide — travel etiquette & law, with an editorial QA gate
-`country-guide` · Flutter + Node/TS + JSON Schema
+**Repository:** `IngatlanSpanyol/ingatlanspanyol`
+**Status:** In use — Coolify, scheduled sync
+**Role:** Solo
+**Stack:** Next.js 16, Drizzle + PostgreSQL, next-intl (EN/ES/HU), Google Maps, Playwright, Vitest
 
-**What it is.** An offline-capable app that tells a traveller, per country, how to behave like a
-local and what will get them into legal trouble — built on **one versioned data layer powering
-three products**: the consumer app, a licensable API, and white-label B2B builds.
+A trilingual property portal that syncs listings from an upstream Supabase feed into its own
+database. Standard search-and-detail product, with the interesting part in the ingestion: an
+admin-secret-protected sync endpoint, a `sync_runs` audit table with a history API, an optional IP
+allowlist and an explicit `TRUST_PROXY_HEADERS` opt-in rather than trusting forwarded headers by
+default.
 
-**Why it's interesting engineering.** The hard part isn't the app, it's *trust*: this is legal and
-cultural advice, so wrong content is worse than no content. The repo's centre of gravity is a
-machine-enforced editorial pipeline that makes un-reviewed claims physically unable to ship.
+One bug worth recording because the fix is in the Dockerfile as a comment: the scheduled sync called
+the app through its own public URL and failed every time, because a container cannot reach itself
+through the reverse proxy. It calls localhost now. Small, and the sort of thing that only shows up
+in a real deployment.
 
-**Stack.** Flutter (schema-driven offline cards) · Node/TypeScript API · git-versioned JSON country
-packs · zero-dependency JSON Schema validator · Claude Code content pipeline.
+A companion WordPress plugin lets the search embed into an existing WP site.
 
-**Features**
+### jp-jobs — Japanese hospitality job board
 
-- **Country packs as source of truth** — one git-versioned JSON file per country, validated against
-  a formal JSON Schema with a per-field metadata envelope (severity, sources, confidence, hedge,
-  `ai_generated`, `human_reviewed`).
-- **A two-layer validator** (`schema/validate.mjs`, no dependencies): structure first, then a
-  **non-negotiable QA gate** that fails publish if any field at `severity >= caution` has empty
-  `sources[]`, if any such field still has `human_reviewed: false`, if a `confidence: low` field
-  lacks a hedge string, or if `meta.overall_risk` disagrees with the value auto-derived from the
-  pack's severity spread.
-- **Publish vs staging modes** — gate failures are hard errors in publish mode (CI blocks the
-  merge) and warnings in staging so drafts can progress.
-- **AI drafts, humans approve.** The first real pack (Japan) is deliberately committed in the
-  pre-approval state and is *correctly blocked* from publishing until a human verifies each cited
-  source. The block is the feature.
-- **Passport-rules join layer** — visa, consular and extra-jurisdiction rules resolved at query
-  time rather than duplicated into every pack.
-- **Content pipeline** — fetch sources → draft → QA gate → human review → publish, plus a
-  risk re-derivation command to bring stored values back in line after severity edits.
+**Repository:** `jp-jobs`
+**Status:** In use — v3.6.49
+**Role:** Solo
+**Stack:** Next.js 16, Prisma + PostgreSQL (12 migrations), NextAuth v5, next-intl, Anthropic and OpenAI SDKs, Stripe, Playwright, gitleaks in CI
 
-**Status.** Schema, validator, QA gate and the first cited pack are built; app and API are
-scaffolded. Flutter app at v0.4.0+4.
+A bilingual marketplace connecting foreign candidates with Japanese hospitality employers. Three
+role surfaces — candidate, employer, admin — with the workflows that make this market specific
+rather than generic: visa case tracking with assignment to a lawyer role, and generation,
+translation and PDF export of the **shokumu keirekisho**, the Japanese-format career history
+document, with usage metering on the AI calls.
+
+Beyond that it is a large, ordinary, well-worn CRUD platform: job posting and moderation, applicant
+pipelines, a candidate discovery marketplace, Stripe checkout, a translated blog, map search,
+audit logs, rate-limit event tracking and a performance budget checker in CI.
+
+To repeat the earlier warning, because the confusion is easy: this is **not** the OmotenashiJobs
+platform from case studies 01 and 04. Different product, different codebase, no video assessment
+in it.
 
 ---
 
-### Two Lies and a Truth — party/social game
-`liesandtruth` · Flutter + Firebase
+## 2. Built and verified, but nobody outside has used it
 
-**What it is.** A cross-platform social deduction game — each player writes three statements, one
-true, and others vote — with five distinct product modes.
+This is the largest group, and the distinction from section 1 is the point of separating them.
+Everything here passes its own tests. None of it has met a stranger.
 
-**Stack.** Flutter · Riverpod · GoRouter · Freezed · Firebase (Auth, Firestore, Cloud Functions,
-Messaging, Analytics, Crashlytics, Remote Config) · AdMob · RevenueCat · GitHub Actions CI.
+### Sentinel — WordPress security and operations platform
 
-**Features**
+**Repository:** `sentinel`
+**Status:** Built — MVP complete, not deployed to customers
+**Stack:** Next.js 15, pg-boss worker, PostgreSQL 16 + Drizzle, zero-dependency PHP plugin
 
-- **Five modes** — realtime multiplayer, async friend challenges, daily challenge, single-player
-  trivia ladder and a couples/date mode with its own question banks and premium sessions.
-- **Server-authoritative rules** in Cloud Functions with enforced invariants: exactly three
-  statements, one valid true index, no vote after the reveal deadline, no round finalisation without
-  votes, winner is first to the target score.
-- **11 callable functions** — create room, quick-play enqueue/cancel, rematch, ready check, submit
-  round, submit vote, next round, solo results, solo progress save, content seeding.
-- **Room lifecycle engineering** — presence, recovery, state, quick-play matchmaking, rate limiting
-  and blocking, each with a dedicated test file.
-- **Progression** — achievements, avatar studio, match history, player stats, leaderboards, friends
-  and an activity feed.
-- **Shop** — category packs, couples packs, cosmetics, IAP catalogue and validation.
-- **Polish** — custom GLSL shader backdrops (fire/blue/passion portals), emoji reactions, reveal
-  sequences, story summaries, share cards, haptics, audio.
-- **Privacy engineering** — a Crashlytics PII scrubber with its own test.
-- **Analytics** — BigQuery SQL for daily retention, async conversion, quick-play conversion and a
-  monetisation summary.
-- **Quality** — 26 Flutter test files, two integration tests (smoke + full journey), and three CI
-  workflows (CI, E2E, security).
-- **Content pipeline** — see `lie2me-collector` below.
+A console for agencies maintaining fleets of WordPress sites, plus an agent plugin that runs on each
+site. The plugin has **no dependencies at all**, which is deliberate: anything you install on
+someone else's production site is something you are now responsible for patching.
 
----
+The wire protocol is the part I'd show someone. Every request carries
+`HMAC-SHA256(secret, "{timestamp}.{nonce}.{raw_body}")` with a ±300 s window and single-use
+per-site nonces pruned by the worker. The per-site secret is stored AES-256-GCM encrypted server
+side and derived from `AUTH_KEY` on the WordPress side, so neither end holds the other's plaintext.
+Pairing hands back the key material exactly once. TOTP is implemented by hand against RFC 6238 and
+unit-tested rather than pulled from a library — a decision I'd defend for a security product, since
+it is a small enough spec to own and verify.
 
-### Block Puzzle (Unity) — the original
-`block-puzzle` · C# / Unity · ~118 MB
+What is missing is the commercially important half: uptime and SSL monitoring, Wordfence feed
+import, and notifications. The security foundation is finished; the monitoring product on top of it
+is not.
 
-**What it is.** The Unity predecessor to the Flutter Lumino line: a commercial block-puzzle build
-with full mobile monetisation and platform services wired up.
+### SoforApp — ride-hailing on a bidding model
 
-**Stack.** Unity · C# · Firebase (App, Auth, Database) · Google Mobile Ads (banner, interstitial,
-rewarded, app-open, plus UMP consent and iOS ATT) · Google Play Games Services · Google Sign-In ·
-RevenueCat · LeanTween · Spine animation.
+**Repository:** `soforapp`
+**Status:** Built — full flow works locally against seeded accounts
+**Stack:** NestJS + Prisma + PostgreSQL, Socket.IO, Redis, two Flutter apps, Codemagic
 
-**Features** — board/piece engine with multiple game modes (bomb, time), boosters and a booster
-subscription, a hold slot, currency and spark managers, a shop catalogue and UI, theme definitions
-and a theme manager, a tutorial system with scripted board data, a popup/screen framework, a dev
-overlay, and editor tooling for batch Android/iOS builds with Gradle and Xcode post-processors.
+Passengers request a ride and transport *companies bid* for it, instead of an algorithm dispatching.
+The whole lifecycle is state-machine validated — request, broadcast, bid, accept, assign driver,
+en route, in progress, complete, rate — with realtime room-based events per company and per ride.
 
----
+The rule I like best is a business constraint expressed as a guardrail: a company cannot bid unless
+its wallet holds at least `bid + 2000`, so nobody wins work they can't be charged commission for.
+Around that sits invoicing through Billingo with a retry service and reconciliation, a
+country-specific billing policy module, team and driver management with OTP activation, and ride
+conversations.
 
-## 4. Automation, pipelines & developer tooling
+Honest status: nearby-company matching is mocked as "first N companies" and the payment provider is
+mocked at the wallet layer. It is a complete demonstration of the model, not a deployed service.
 
-### n8n workflow library — 21 productised automations
-`n8n-workflows` · JavaScript
+### Grundi — the greenfield rebuild
 
-**What it is.** A version-controlled library of production n8n automations built and deployed
-through the n8n MCP server, each packaged as a reusable product rather than a one-off flow.
+**Repository:** `grundi-`
+**Status:** Built
+**Stack:** Next.js storefront, NestJS + Fastify API with OpenAPI, BullMQ workers, Drizzle, Zod contracts, OpenSearch, MinIO, Redis
 
-**Features**
+A from-scratch replacement for the OpenCart marketplace in section 1 — same business, contract-first
+architecture, six packages sharing typed Zod contracts.
 
-- **21 workflow packages**, each with a README, an intake script, a runner, status-event handling,
-  an ops test and exported n8n draft JSON: AI email assistant, automatic invoicing, booking/review
-  onboarding, content client status, CRM↔Google Sheets, customer follow-up (generic and Gmail with a
-  reply monitor), document generation, Hermes task automation (email intake, GitHub PR, daily
-  review), incoming-invoice AI, advanced invoice extraction (Gmail *and* Outlook intake, Sheets
-  template), lead automation with follow-up runner, Meta Ads assistant, payment reminders, report
-  automation, supplier feed/inventory, support-ticket routing, webshop chatbot, WooCommerce admin
-  automation, WordPress security monitor (IMAP intake + daily digest), and a catalogue upsert that
-  feeds the Webautomatizáció storefront.
-- **MCP-driven authoring** — a connection checker that asserts the server advertises the required
-  builder tools (`search_nodes`, `validate_workflow`, `create_workflow_from_code`, `update_workflow`,
-  `prepare_test_pin_data`, `test_workflow`, `get_execution`).
-- **Safety rule** — workflow drafts stay inactive until publishing is explicitly approved.
+The design decision worth noting is the dual data store: an in-memory implementation for fast local
+work and tests, and PostgreSQL as canonical, with both sharing order numbering, moderation gating,
+settlement rules, session handling and SKU constraints. Where they diverge, Postgres wins by
+declaration in the README. That is a rule that has to be written down, because the alternative is
+discovering the divergence in production.
 
----
+Running two systems for one business is a real cost, and the honest read is that the live OpenCart
+store is what earns money while this is what a maintainable version would look like.
 
-### Automated trading pipeline — research-first quant scaffold
-`trading` · Python · NautilusTrader
+### Eutory — European brand directory
 
-**What it is.** A research → backtest → paper → small-live pipeline for stocks/ETFs and forex on a
-small account, built on NautilusTrader targeting Interactive Brokers.
+**Repositories:** `eutory` (platform) · `eutory-collector` (content pipeline)
+**Status:** Built
+**Stack:** Next.js 16, Prisma 7 + PostgreSQL, NextAuth, Playwright — and Python, Typer, trafilatura, OpenAI-compatible LLM for the collector
 
-**Why it's interesting engineering.** It is written primarily as a defence against self-deception.
-The repo leads with `RESEARCH.md` — framework and broker selection rationale, cost arithmetic,
-Hungarian tax treatment (ETÜ/TBSZ) and a realism section — and the code enforces its conclusions.
+A directory, deals and comparison site for European brands, with a company self-service portal, a
+scoped-API-key public API, first-party analytics, an uptime monitor and an SEO audit script.
 
-**Features**
+The collector is the half I'd defend. It researches a brand from public sources, drafts a content
+document against a versioned contract, then **validates it** — required fields, enums, ISO dates,
+URL shapes, locale codes, canonical slugs, GEO objects — and explicitly **refuses to invent database
+IDs**. Foreign keys stay as placeholders until resolved from a local mapping file in a separate
+step. An AI content pipeline that fabricates a plausible-looking foreign key produces data that
+imports cleanly and is wrong, which is the worst available outcome.
 
-- **Five "iron rules" encoded as constraints**, not comments: no backtest may run without the real
-  fee model (gross P&L is treated as fiction); trade frequency capped by design; a cash account
-  means long-only, no shorting or leverage; the kill switch lives at the broker, not in code.
-- **A validation ladder that cannot be skipped** — in-sample → walk-forward → untouched holdout →
-  ≥4 weeks IBKR paper → tiny live, justified by the observed R² < 0.025 between backtest Sharpe and
-  live performance.
-- **Real IBKR/OANDA fee models** in `config/fees.py`, mandatory in every backtest.
-- **A smoke backtest that is designed to lose money** — an EMA cross over synthetic random-walk data
-  whose expected output is a small net loss, most of it fees, demonstrating exactly what ~30
-  trades/day costs a $5k account.
+### EuroSzaki — skilled-trades job board
 
-**Status.** Research, stack selection and a green smoke backtest done (Nautilus 1.231). Next rung
-is an IBKR paper account.
+**Repository:** `euroszaki`
+**Status:** Built
+**Stack:** Laravel, Blade, Filament admin, Laravel Cashier, MySQL
 
----
+A job board placing skilled tradespeople into Germany, Austria and the Netherlands. Listings with
+tags, pricing tiers and upsells; candidate profiles and applications; employer accounts;
+conversations.
 
-### Question Collector — AI content pipeline at scale
-`lie2me-collector` · Python
+The half that took the work is acquisition rather than the board itself: an Apify/Indeed import
+service with auto-import and expiration-check console commands and an import statistics dashboard,
+a résumé parser for uploaded CVs, an AI translation service backing a fully localised interface,
+click tracking with attribution on outbound listing clicks, and marketing automation — newsletter,
+Filament-managed email campaigns, a weekly digest command and automated Facebook Page posting. A
+job board with no listings and no traffic is a schema, so most of the engineering went there.
 
-**What it is.** The content factory behind the trivia modes of *Two Lies and a Truth* — designed for
-repeatable drops of 60, 600 or 10,000+ questions without quality collapse.
+`jobscore` is a byte-identical duplicate of this repository.
 
-**Stack.** Python · OpenAI-compatible providers (plus a mock provider needing no key) · Docker ·
-PostgreSQL · n8n integration.
 
-**Features**
+### Two Lies and a Truth
 
-- **Quota-driven content map** balancing category and difficulty, emitting the exact
-  `soloQuestions[]` / `soloLevels[]` schema the app consumes.
-- **Nine validation checks** — schema shape, exact duplicate prompts, windowed near-duplicate
-  detection, option count/uniqueness/length balance, difficulty fit, category fit and profanity.
-- **CI-grade quality gates** — `--max-warnings`, `--max-warning-rate` and per-code rate ceilings
-  (e.g. `near_duplicate_prompt=0.02`) that fail the build.
-- **Chunked scaling** — generate in batches, dedupe each batch against previous bundles with
-  `--seed-bundle`, then `merge-bundles` into one deduplicated release.
-- **Internet research mode** — searches Wikipedia and Wikidata, extracts facts *with source URLs*,
-  and builds multiple-choice questions from verified facts rather than model recall.
-- **Reviewer CSV** output for the human review pass, alongside the JSON bundle and validation report.
-- **Async job API** (`POST /api/internet-build` → `202` + job id, poll `GET /api/jobs/{id}`) with
-  API-key auth, designed to be driven by n8n; ships four n8n workflow definitions and a Firestore
-  publisher.
+**Repository:** `liesandtruth`
+**Status:** Built
+**Stack:** Flutter, Riverpod, Freezed, Firebase (Auth, Firestore, Functions, Messaging, Remote Config), AdMob, RevenueCat
 
----
+A social deduction game in five modes — realtime multiplayer, async challenges, daily, solo trivia
+ladder, and a couples mode. Rules are server-authoritative in Cloud Functions with hard invariants:
+exactly three statements, one valid true index, no vote after the reveal deadline, no round
+finalised without votes. Eleven callable functions, and room lifecycle, presence, recovery,
+matchmaking, rate limiting and blocking each with their own test file.
 
-### Amelia ↔ Számlázz.hu bridge
-`amelia-szamlazzhu` · PHP · WordPress plugin
+Two details I'd point out. There is a **Crashlytics PII scrubber with its own unit test** — crash
+reports from a game where users type personal statements about themselves will contain those
+statements unless something removes them. And the analytics layer ships BigQuery SQL for retention,
+conversion and monetisation rather than leaving that to be written later under pressure.
 
-**What it is.** A commercial WordPress plugin that connects Amelia Booking directly to Számlázz.hu
-invoicing, so a completed booking produces a compliant Hungarian invoice with no manual step.
+### Country Guide
 
-**Features** — Amelia bridge, invoice generator, Számlázz.hu API client, a custom **field manager**
-with a field-setup admin page, a **retry queue** for failed invoice attempts, an invoice log viewer,
-a **licence manager** for commercial distribution, and Hungarian localisation (`.po`/`.pot`).
+**Repository:** `country-guide`
+**Status:** Research / partially built
+**Stack:** Flutter app, Node/TS API, git-versioned JSON packs, zero-dependency schema validator
 
----
+An offline app telling travellers how to behave and what will get them arrested, built on one
+versioned data layer intended to serve three products — the app, a licensable API, and white-label
+builds.
 
-### Resume Maker — JD-targeted CV variant generator
-`resumemaker` · JavaScript
+The app is a stub. The reason it's here is the **editorial gate**, which is the actual product. Each
+content field carries severity, sources, confidence, a hedge string, `ai_generated` and
+`human_reviewed`. A dependency-free validator refuses to publish if any field at
+`severity >= caution` has empty sources or is still un-reviewed, if a low-confidence field lacks a
+hedge, or if the pack's stored overall risk disagrees with the value derived from its own severity
+spread. Publish mode makes those hard errors that block CI; staging mode downgrades them to warnings
+so drafts can move.
 
-**What it is.** A local-first pipeline that keeps one canonical JSON Resume and generates
-role-targeted variants from a job description — without ever letting the AI edit protected facts.
+The first pack, Japan, is committed in the deliberately blocked state — AI-drafted, un-reviewed, and
+correctly refused by its own gate. Given the content is legal advice, a pipeline that *cannot*
+ship an unsourced claim seemed more valuable than one that ships faster.
 
-**Features** — profile-weighted keyword extraction from a job description; deterministic *or*
-AI-enhanced variant generation; a **path-based field-lock config** so personal details are immutable
-while `basics.summary` may be tailored; a validator that fails if a locked field drifted; and
-generation metadata logged per run for auditability.
+### NexusPress — AI WordPress block generation
 
----
+**Repositories:** `aiwp2` (platform) · `aiwp-plugin` (companion plugin v1.0.0)
+**Status:** Built
+**Stack:** Next.js 14, Prisma + MySQL, Google Gemini, Stripe, JWT, WordPress plugin (PHP 7.4+, GPL-2.0)
 
-## 5. Websites & client work
+Generates brand-consistent Gutenberg blocks from a prompt and injects them into a connected
+WordPress site in one click. A per-account "brand DNA" — colours, fonts, voice, industry —
+conditions every generation; the plugin exposes a JWT-authenticated REST endpoint and creates the
+result as a **draft**, never publishing directly to someone's live site.
 
-### nstudio.hu — agency site
-`nstudio` · Next.js 16 · React 19 · next-intl (EN/HU) · Tailwind · Radix · Framer Motion ·
-Resend + nodemailer · Cloudflare Turnstile · Redis-backed rate limiting.
+Credits and subscriptions run through Stripe with full webhook handling. Unit suites cover JWT,
+password hashing, sanitisation and validation schemas.
 
-Bilingual agency site with services, case studies, an audit funnel, a project-start flow, a CV page
-and dark mode — plus the **app-compliance surface** for the mobile portfolio: privacy policies,
-terms, refund policy and GDPR account/data-deletion pages and API endpoints for Lumino, Lie to Me
-and SoforPlus (driver and passenger), as required by the app stores.
+### Webautomatizáció — productised automation shop
 
-### oldal.ai — product marketing site
-`oldal.ai` · Next.js 16 (Turbopack) · React 19 · Tailwind 4 · Motion · MDX blog
-(`gray-matter` + `next-mdx-remote`) · Docker standalone build on Coolify.
+**Repository:** `webautomatizacio`
+**Status:** Built
+**Stack:** Next.js storefront, Medusa with a custom module, PostgreSQL, Puppeteer, Docker + Caddy
 
-Marketing site for the Oldal builder: features, solutions, pricing, about, contact, a git-based MDX
-blog with reading time and GFM, sitemap/robots, and an animation-forward but restrained design
-system optimised for Core Web Vitals.
+A Hungarian agency storefront selling n8n workflows as catalogue items, with a custom Medusa module
+carrying automation requests, offers, customers and knowledge articles through seven migrations. The
+pipeline runs request → review → offer generated and rendered to PDF → sent → approved → invoice →
+tokenised onboarding form.
 
+Notable for what it refuses to do: **no card payments and no Stripe**, by design. Payment is by
+invoice, there is no card form anywhere, and that is documented as a deliberate security decision
+for an MVP rather than a missing feature.
 
 ---
 
-## 6. Earlier work & experiments
+## 3. Research, tooling and infrastructure
 
-### Crypto trading Telegram bot
-`crypto-telegram-bot` · Python 3.13 · python-telegram-bot v22 · SQLite · Stripe + Web3.py ·
-Matplotlib · Render.
+### sear — a single-moment cooking coach
 
-A production Telegram bot with 40+ commands: real-time prices, matplotlib charts with technical
-indicators (RSI, MACD, Bollinger), multi-timeframe analysis, sentiment and gas tracking across four
-chains; portfolio tracking with P/L and BTC/ETH benchmarking; price and DEX-swap ("whale") alerts
-polled every 60 s; multi-chain wallet tracking (Ethereum, BSC, Polygon, Arbitrum); and a four-tier
-subscription system billed either by **Stripe** or **on-chain USDT/USDC on Polygon** with
-transaction verification.
+**Repository:** `cook-solutions`
+**Status:** Research — blocked on kitchen time, not on code
+**Stack:** Python, numpy (hand-rolled STFT, no librosa), OpenCV, uv, pytest
 
-### Multi-agent travel planner
-`travelplanning` · Python · Anthropic SDK · Flask · SQLite.
-An early multi-agent system — flight, hotel, itinerary, multi-city, seasonal-optimiser, group/budget,
-insurance/visa, accessibility/carbon and photo/voice agents behind a trip orchestrator, with Amadeus
-and Booking integrations and a Flask API. Superseded by later work but a clear demonstration of
-agent decomposition.
+**Covered in [case study 0002](case-studies/0002-cook-solutions-audio-detection/README.md).** One
+mistake — the pan wasn't hot enough when the food went in — detected within seconds and corrected
+while it still can be. A cold pan is an audio problem rather than a vision one, which makes the
+whole thing orders of magnitude cheaper and immune to a hand occluding the pan.
+
+The part that belongs in an engineering index is the discipline around the measurement. Splits are
+session-level and **frozen after first run**; the held-out test split is not examined until day 11
+of a 14-day plan. Throwaway clips used to exercise the ingest → label → split → harness plumbing go
+into `SMOKE` sessions that are structurally excluded from splits and eval runs, so they cannot
+contaminate a real number. `DECISIONS.md` records every idea that was cut *with the condition that
+would reopen it*, and the README states the limits — one kitchen, one cook, one camera angle, no
+real users, no evidence it changes how anyone learns.
+
+`cookai` is the earlier weekend-scoped attempt at the same problem, kept for provenance.
+
+### Automated trading pipeline
+
+**Repository:** `trading`
+**Status:** Research — smoke backtest green, no live capital
+**Stack:** Python, NautilusTrader 1.231, Interactive Brokers as target broker
+
+Research → backtest → paper → small live, for a small account. The repository is written primarily
+as a defence against self-deception, and the code enforces what the research concluded.
+
+No backtest may run without the real IBKR fee model, because gross P&L is fiction. The validation
+ladder — in-sample, walk-forward, untouched holdout, four weeks of paper, then tiny live — has no
+skippable rungs, justified in `RESEARCH.md` by the observed R² below 0.025 between backtest Sharpe
+and live results. A cash account means long-only. The kill switch lives at the broker, not in code,
+because a kill switch that depends on your code still running is not one.
+
+The smoke backtest is **designed to lose money**: an EMA cross over synthetic random-walk data whose
+expected output is a small net loss, most of it fees, demonstrating what thirty trades a day costs a
+$5k account. I would rather the first thing a reader runs be the cost of trading than a curve.
+
+### n8n workflow library
+
+**Repository:** `n8n-workflows`
+**Status:** In use — 21 automations
+**Stack:** JavaScript, n8n via MCP
+
+Twenty-one productised automations, each packaged with a README, intake script, runner,
+status-event handling, ops test and exported workflow JSON: invoice extraction from Gmail and
+Outlook, incoming-invoice AI, payment reminders, lead automation with follow-up, customer follow-up
+with a reply monitor, CRM to Sheets, support ticket routing, WooCommerce admin, a WordPress security
+monitor with IMAP intake and a daily digest, Meta Ads assistant, webshop chatbot, and more.
+
+Authoring goes through an MCP connection that first asserts the server advertises the builder tools
+it needs. Drafts stay inactive until publishing is explicitly approved — a workflow that starts
+itself on creation is a workflow that emails your customers during a test.
+
+### Hermes — agent operations with a human gate
+
+**Repositories:** `hermes-vps-agent/hermes-agent` · `hermes-vps-agent/hermes-dashboard`
+**Status:** Built — dashboard deployed, Tailscale-only
+**Stack:** Next.js 14, PostgreSQL, Docker, OpenRouter, GitHub API, n8n
+
+An autonomous coding agent on a VPS with approval in front of every merge and deploy, reviewed from
+a phone. Each queue item shows task, project, colour-coded risk, branch and links to PR, staging,
+screenshots and test report; approving merges the PR and records a deployment row.
+
+The intake design is the interesting constraint. Describing work in plain language does not queue
+anything — an LLM distinguishes chit-chat from build requests, asks *one* clarifying question when
+vague, then renders a task preview that must be explicitly tapped. A raw sentence can never launch
+the runner on the wrong thing. The dashboard has no authentication at all, which is a deliberate
+choice paired with network-layer restriction rather than an omission.
+
+The agent repository also carries delivered artefacts with evidence bundles — a WordPress FSE theme
+generator with `theme.json` v3 schema validation, and a site builder whose QA scorer is calibrated
+against a deliberately-bad control site.
+
+### Question Collector
+
+**Repository:** `lie2me-collector`
+**Status:** Built
+**Stack:** Python, OpenAI-compatible providers plus a keyless mock, Docker, n8n integration
+
+The content factory behind the trivia modes of *Two Lies and a Truth*, built for repeatable drops of
+60, 600 or 10,000+ questions. Nine validation checks — schema, exact and windowed near-duplicate
+detection, option quality, difficulty and category fit, profanity — with CI-grade gates that fail
+the build on rate ceilings such as `near_duplicate_prompt=0.02`.
+
+Scaling is chunked: generate in batches, dedupe each against previous bundles with `--seed-bundle`,
+merge with dedupe. Internet research mode builds questions from facts extracted from Wikipedia and
+Wikidata **with source URLs attached**, rather than from model recall. Output includes a reviewer
+CSV, because the human pass was assumed from the start rather than added when quality slipped.
+
+### Smaller tools
+
+**`amelia-szamlazzhu`** — a commercial WordPress plugin bridging Amelia Booking to Számlázz.hu
+invoicing, with a custom field manager, a **retry queue** for failed invoice attempts, an invoice
+log and a licence manager. The retry queue is the whole value: an invoice that silently fails to
+issue is a compliance problem, not a UI problem.
+
+**`resumemaker`** — generates job-targeted CV variants from one canonical JSON Resume, with a
+path-based **field-lock config** so the AI may tailor a summary but cannot touch personal facts, and
+a validator that fails if a locked field drifted.
+
+**`nstudio`** — the agency site, and the app-compliance surface for everything else here: privacy
+policies, terms, refund policy and GDPR deletion pages and endpoints for Lumino, Lie to Me and
+SoforPlus, which the app stores require and which have to exist somewhere.
 
 ---
 
-## 7. Full repository index
+## 4. Archived
 
-Legend — **Prod**: running in production · **Ship**: published to an app store ·
-**Build**: complete, not deployed · **WIP**: active development · **Arch**: archived/superseded ·
-**Dup**: duplicate of another entry · **Empty**: placeholder, no code.
+Listed for completeness rather than as evidence.
 
-| Repository | What it is | Primary stack | State |
+**`block-puzzle`** — the Unity/C# predecessor to Lumino, with AdMob, Play Games Services, RevenueCat
+and editor tooling for batch iOS/Android builds. Superseded by the Flutter rewrite.
+
+**`hostjobs`** and **`jp-hospitality-import-jobs`** — the WordPress implementation of the Japanese
+job board and its PHP feed importer, both superseded by `jp-jobs`.
+
+**`crypto-telegram-bot`** — a Telegram bot with 40+ commands: charts with technical indicators,
+portfolio P/L, price and DEX alerts, multi-chain wallet tracking, and a subscription tier system
+billed either through Stripe or on-chain USDT/USDC on Polygon with transaction verification.
+
+**`tripora`** — a React Native trip-plan marketplace with Stripe subscriptions via Supabase edge
+functions, offline caching and seven languages. Complete, unlaunched.
+
+**`travelplanning`** — an early multi-agent trip planner. Superseded, and useful now mainly as a
+marker of how much the agent tooling changed in a year.
+
+**`cookai`** and **`nagytamasgit/ingatlanspanyol`** — earlier snapshots of projects above. Two further
+duplicates exist and are discussed under *What I would do differently* rather than listed here.
+
+---
+
+## Full index
+
+| Repository | What it is | Stack | State |
 |---|---|---|---|
-| `app.oldal.ai` | AI website-builder SaaS (multi-tenant, credit-billed) | Next.js 15, Drizzle/PG, Claude | Prod |
-| `oldal.ai` | Marketing site for the above | Next.js 16, MDX | Prod |
-| `xprize` | AI "business employee" — booking, invoicing, discoverability | Next.js, PG event log, Gemini | Prod |
-| `sentinel` | WordPress security & ops platform + WP agent plugin | Next.js 15, Drizzle/PG, PHP | Build |
-| `cossy` | Cosplay social network with creator economy | Flutter, Supabase, RevenueCat | Ship |
-| `country-guide` | Travel etiquette & law app with a machine-enforced editorial QA gate | Flutter, Node/TS, JSON Schema | WIP |
-| `toms-blocks` | Lumino Block Puzzle — published game | Flutter, Firebase, RevenueCat | Ship |
-| `lumino-rush` | Arcade spin-off with rhythm mode | Flutter, RevenueCat | Ship |
-| `soforapp` | Ride-hailing with partner bidding | NestJS, Prisma, Flutter ×2 | Build |
-| `cook-solutions` | `sear` — single-moment cooking coach (audio ML) | Python, numpy DSP | WIP |
-| `trading` | Research-first quant pipeline (fees mandatory, validation ladder) | Python, NautilusTrader | WIP |
-| `grundi-` | Multi-vendor marketplace (greenfield rebuild) | Next.js, NestJS, Drizzle | Build |
-| `grundi-opencart` | The live grundi.hu OpenCart marketplace: settlement engine, invoicing, lifecycle email | PHP, OpenCart 3, Webkul | Prod |
-| `getcourse` | Anfisa Beauty — GetCourse replacement (LMS, memberships, booking) | WordPress, LearnDash, Woo | Prod |
-| `IngatlanSpanyol/ingatlanspanyol` | Costa del Sol property search (EN/ES/HU) | Next.js 16, Drizzle/PG | Prod |
-| `eutory` | European brand directory, deals & comparisons | Next.js 16, Prisma/PG | Build |
-| `eutory-collector` | AI research → validated content drafts for Eutory | Python, Typer, LLM | Build |
-| `jp-jobs` | Japan hospitality job board (v3.6.49) | Next.js 16, Prisma, NextAuth | Prod |
-| `euroszaki` | EU skilled-trades job board | Laravel, Filament, Blade | Build |
-| `webautomatizacio` | Productised automation shop | Next.js, Medusa, PG | Build |
-| `liesandtruth` | Two Lies and a Truth — social game (client + backend) | Flutter, Firebase Functions | Build |
-| `hermes-vps-agent/hermes-agent` | Autonomous agent task protocol + delivered work | JS, WP theming, n8n | Build |
-| `hermes-vps-agent/hermes-dashboard` | Phone-first approval dashboard for the agent | Next.js 14, PG, OpenRouter | Build |
-| `n8n-workflows` | 21 productised n8n automations | JS, n8n MCP | Prod |
-| `lie2me-collector` | AI question-generation pipeline with quality gates | Python, Docker, n8n | Build |
-| `aiwp2` | NexusPress — AI WordPress block SaaS | Next.js 14, Prisma/MySQL, Gemini | Build |
-| `aiwp-plugin` | NexusPress WordPress companion plugin v1.0.0 | PHP, JWT | Build |
-| `nstudio` | Agency site + app compliance/legal surface | Next.js 16, next-intl | Prod |
-| `tripora` | Trip-plan marketplace app | React Native/Expo, Supabase | Build |
-| `block-puzzle` | Unity predecessor of Lumino | Unity, C#, Firebase | Arch |
-| `cookai` | Earlier weekend-scoped attempt at `sear` | Python | Arch |
-| `crypto-telegram-bot` | Crypto trading/alerts bot with subscriptions | Python, Stripe, Web3 | Arch |
-| `amelia-szamlazzhu` | Amelia ↔ Számlázz.hu invoicing bridge | PHP, WordPress | Build |
-| `hostjobs` | WordPress predecessor of the JP job board | WordPress, Blocksy, Fluent | Arch |
-| `jp-hospitality-import-jobs` | PHP job-feed importer for the above | PHP, SQLite | Arch |
-| `resumemaker` | JD-targeted CV variant generator with field locks | Node.js | Build |
-| `travelplanning` | Multi-agent trip planner | Python, Anthropic, Flask | Arch |
-| `nagytamasgit/ingatlanspanyol` | Earlier snapshot of the property platform | Next.js 16 | Dup |
-| `soforplus` · `hermes` | Reserved names, no code | — | Empty |
+| `toms-blocks` | Lumino Block Puzzle — published game with live-ops economy | Flutter, Firebase, RevenueCat | In use |
+| `grundi-opencart` | Live grundi.hu marketplace: settlement engine, invoicing, lifecycle email | PHP, OpenCart 3, Webkul | In use |
+| `getcourse` | Anfisa Beauty — GetCourse replacement (LMS, memberships, booking) | WordPress, LearnDash, Woo | In use |
+| `app.oldal.ai` | AI website builder, multi-tenant, credit-billed — case study 0001 | Next.js 15, Drizzle, Claude | In use |
+| `oldal.ai` | Marketing site for the above | Next.js 16, MDX | In use |
+| `xprize` | AI "business employee" — booking, invoicing, discoverability | Next.js, PG event log, Gemini | In use |
+| `IngatlanSpanyol/ingatlanspanyol` | Costa del Sol property search (EN/ES/HU) | Next.js 16, Drizzle | In use |
+| `jp-jobs` | Japanese hospitality job board with visa + shokumu keirekisho flows | Next.js 16, Prisma, NextAuth | In use |
+| `n8n-workflows` | 21 productised automations | JS, n8n MCP | In use |
+| `nstudio` | Agency site + app compliance surface | Next.js 16, next-intl | In use |
+| `cossy` | Cosplay social network with creator economy | Flutter, Supabase, RevenueCat | Shipped |
+| `lumino-rush` | Arcade spin-off with a rhythm mode | Flutter, RevenueCat | Shipped |
+| `sentinel` | WordPress security platform + zero-dependency agent plugin | Next.js 15, Drizzle, PHP | Built |
+| `soforapp` | Ride-hailing with partner bidding | NestJS, Prisma, Flutter ×2 | Built |
+| `grundi-` | Greenfield marketplace rebuild | Next.js, NestJS, Drizzle | Built |
+| `eutory` | European brand directory, deals and comparisons | Next.js 16, Prisma | Built |
+| `eutory-collector` | AI research → contract-validated content drafts | Python, Typer, LLM | Built |
+| `liesandtruth` | Social deduction game, server-authoritative rules | Flutter, Firebase Functions | Built |
+| `aiwp2` | NexusPress — AI WordPress block SaaS | Next.js 14, Prisma, Gemini | Built |
+| `aiwp-plugin` | NexusPress WordPress plugin v1.0.0 | PHP, JWT | Built |
+| `webautomatizacio` | Productised automation shop, invoice-only by design | Next.js, Medusa | Built |
+| `euroszaki` | Skilled-trades job board with feed import and marketing automation | Laravel, Filament | Built |
+| `lie2me-collector` | Question pipeline with CI-grade quality gates | Python, Docker | Built |
+| `hermes-vps-agent/hermes-agent` | Agent task protocol + delivered artefacts | JS, WP theming, n8n | Built |
+| `hermes-vps-agent/hermes-dashboard` | Phone-first approval dashboard | Next.js 14, PG, OpenRouter | Built |
+| `amelia-szamlazzhu` | Amelia ↔ Számlázz.hu invoicing bridge with retry queue | PHP, WordPress | Built |
+| `resumemaker` | CV variant generator with field locks | Node.js | Built |
+| `cook-solutions` | `sear` — single-moment cooking coach — case study 0002 | Python, numpy DSP | Research |
+| `country-guide` | Travel etiquette app with a machine-enforced editorial gate | Flutter, Node/TS, JSON Schema | Research |
+| `trading` | Quant pipeline; fees mandatory, validation ladder | Python, NautilusTrader | Research |
+| `block-puzzle` | Unity predecessor of Lumino | Unity, C#, Firebase | Archived |
+| `hostjobs` | WordPress predecessor of the JP job board | WordPress, Blocksy, Fluent | Archived |
+| `jp-hospitality-import-jobs` | PHP job-feed importer for the above | PHP, SQLite | Archived |
+| `crypto-telegram-bot` | Crypto bot, Stripe + on-chain subscriptions | Python, Web3 | Archived |
+| `tripora` | Trip-plan marketplace app, unlaunched | React Native, Supabase | Archived |
+| `travelplanning` | Early multi-agent trip planner | Python, Anthropic | Archived |
+| `cookai` | Earlier attempt at `sear` | Python | Archived |
+| `nagytamasgit/ingatlanspanyol` | Earlier snapshot of the property platform | Next.js 16 | Archived |
+| `soforplus` · `hermes-vps-agent/hermes` | Reserved names, no code | — | Empty |
 
 ---
 
-## Working style
+## What I would do differently
 
-A few things visible across these repositories that may matter more than any single feature list:
+The case studies each end this way and it would be dishonest to write an index of forty
+repositories without it. These are the criticisms I would make of this body of work if someone
+handed it to me.
 
-- **Security is designed in, not bolted on.** HMAC-signed wire protocols with nonce replay
-  protection, AES-256-GCM secrets at rest, hand-implemented and tested TOTP, RLS proven by test,
-  a hardener with its own bypass-attack suite, PII scrubbing before crash reporting. Inherited
-  systems get a dated, written security review that separates fixed from accepted-open, and
-  buyer-identifying documents are treated as PII and kept out of version control.
-- **Honest evaluation.** `sear` freezes its test split and refuses to look at it until day 11;
-  `hermes-agent` calibrates its QA scorer against a deliberately-bad control site; `trading` ships
-  a smoke backtest *designed to lose money* so the fee drag is impossible to ignore; every README
-  states what is *not* done.
-- **Decisions are written down.** `DECISIONS.md`, `locked-decisions.md`, `PROJECT_GUARDRAILS.md`,
-  `FIX-BACKLOG.md` — including the ideas that were cut and the condition that would reopen them.
-- **Correctness enforced by machine, not by discipline.** `country-guide` cannot publish a legal
-  claim that lacks a source or a human sign-off; `trading` refuses a backtest without the real fee
-  model; `getcourse` gates every deploy on a green Playwright suite and proves its backups by
-  restoring them onto a scratch stack; `grundi-opencart` guarantees at-most-once email through
-  database guard rows.
-- **Tested where it counts.** 43 test files in Lumino, 26 in Two Lies and a Truth, ~200 assertions
-  across 15 verification suites in Oldal, Playwright E2E in four platforms, a settlement engine
-  unit-tested then verified against real production payouts.
-- **Shipped, not just built.** Google Play production and internal tracks, VPS and Cloud Run
-  deployments, a live multi-vendor marketplace handling real seller payouts, store listing
-  automation, staged rollouts and migration deadlines met.
+**Too much of it is Built rather than In use.** Ten projects have real users; fifteen are complete,
+tested, and have never been used by anyone outside. Passing your own tests proves the code does what you thought;
+it proves nothing about whether the thing was worth building. The ratio is the single most honest
+criticism available here, and the fix is not more projects — it is finishing fewer of them
+*through* to users.
+
+**I cannot give you outcome numbers for most of it.** I can tell you about coverage, architecture
+and deadlines met. I largely cannot tell you retention, conversion or revenue, because for most of
+these I did not instrument the thing that would have told me. In the case studies I had JLPT
+certificates, a rejection rate, and an 82% figure for calls surviving to a real conversation — the
+projects in this list mostly lack an equivalent, and where I have not published a number here it is
+because I could not source one I would defend, not because it was unflattering.
+
+**Four duplicates and two abandoned snapshots.** `jobscore` is byte-identical to `euroszaki`.
+`aiwp` and `aiwp2` are the same product, and there were two copies of the property platform at
+different versions. That is what shipping quickly across many projects costs when repository
+hygiene is nobody's priority, and it makes the list look larger than the work is.
+
+**Secrets in six repositories.** An audit across everything found live credentials committed and
+still in history: two Android signing keystores, an Anthropic key, a database URL, WordPress salts
+and several API keys. All in private repositories, so none of it leaked — but "the repository was
+private" is a mitigation, not a practice. The right habit is a pre-commit secret scanner from the
+first commit, which I now run and did not then. One of these was purged properly, with the history
+rewritten, when the repository was published.
+
+**Several READMEs are still `create-next-app` boilerplate.** For a body of work whose main artefact
+is the repository, that is a real gap, and it is visible in the ones I could not describe well here
+without reading the source.
+
+**Breadth was partly a choice and partly a habit.** Forty repositories in eleven months means some
+of them are one good week each. The projects I would actually point at — the settlement engine,
+Sentinel's wire protocol, `sear`'s evaluation discipline, Country Guide's editorial gate — are the
+ones where I stayed long enough to get the hard part right. The rest is competent, and competent is
+not the interesting part of anyone's work.
+
+**What I would keep.** The habit of writing decisions down, including what was cut and what would
+reopen it. Building the harness before the feature — the restore drill, the frozen splits, the
+verification suites, the fee model that cannot be skipped. And enforcing correctness in a machine
+rather than in my own discipline, because my discipline is the thing that fails at 2am under
+deadline and a validator is not.
 
 ---
 
-*Prepared 2026-08-22. Repository contents are private; demos and read-only code access available on
-request — [nagytmas@gmail.com](mailto:nagytmas@gmail.com).*
+## Access
+
+These repositories are private because they contain client and commercial work. I'm glad to arrange
+a walkthrough, a read-only collaborator invite, or a sanitised code sample for anything here —
+client-owned code only with the client's consent, which I'll ask for before sharing.
+
+**[nagytmas@gmail.com](mailto:nagytmas@gmail.com)** — tell me which project and what you want to
+see. If you'd rather read than meet, start with [case study 01](01-video-assessment.md); it is the
+best single thing I have written about my own work.
+
+*Compiled 2026-08-22 from repository contents rather than memory.*
