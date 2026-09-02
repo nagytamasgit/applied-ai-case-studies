@@ -10,14 +10,17 @@ A system that converts an arbitrary customer photograph into a paintable, number
 ## Contents
 
 1. [The gap](#1-the-gap): why the output is a bill of materials, not an image
-2. [What I did not build](#2-what-i-did-not-build): the rejected approaches, and the constraints that decided the architecture
-3. [The problems that actually took the time](#3-the-problems-that-actually-took-the-time): face detection, skin, colour space, paintability, lines
-4. [How I knew it worked](#4-how-i-knew-it-worked): the benchmark, the review loop, the flags, the regression guard
-5. [Running it in production](#5-running-it-in-production): the service, workers, memory, and the measured scaling curve
-6. [Cost](#6-cost)
-7. [What I would do differently](#7-what-i-would-do-differently)
+2. [How it unfolded](#2-how-it-unfolded): the thirteen decisions in the order they were made
+3. [What I did not build](#3-what-i-did-not-build): the rejected approaches, and the constraints that decided the architecture
+4. [The problems that actually took the time](#4-the-problems-that-actually-took-the-time): face detection, skin, colour space, paintability, lines
+5. [How I knew it worked](#5-how-i-knew-it-worked): the benchmark, the review loop, the flags, the regression guard
+6. [Running it in production](#6-running-it-in-production): the service, workers, memory, and the measured scaling curve
+7. [Cost](#7-cost)
+8. [What I would do differently](#8-what-i-would-do-differently)
 
 *Every number in this document comes from a measurement recorded in the project. Where a decision was made without a measurement, it says so.*
+
+*If you read one section, read [5](#5-how-i-knew-it-worked): how the shop's own sold output became the benchmark, and what that measurement disproved.*
 
 ---
 
@@ -29,7 +32,39 @@ The obvious framing is "automate the graphic designer." That framing is wrong, a
 
 **The output is not an image. It is a bill of materials.** Every region of the final picture must map to a specific jar of paint that physically ships to the customer. There is no blending, no dithering, no gradient. A colour either exists in the 806-paint recipe table and is one of the 30, 39 or 48 selected, or it cannot appear. The problem is not image generation under aesthetic judgment, it is constrained discrete optimisation where the constraints are physical objects in a cardboard box.
 
-## 2. What I did not build
+## 2. How it unfolded
+
+The sections below are organised by topic. This one is organised by sequence, because the order matters: most of the important decisions were reversals of earlier ones, and each reversal was forced by a measurement, not a preference. The order follows the project's own cause-and-effect rather than calendar dates; where a decision has no measured number behind it, that is stated.
+
+**1. Framing.** The brief said "automate the graphic designer." Reframed it as a bill-of-materials problem: every region must map to a jar that ships. That single reframe ruled out generative models before any code existed, on physical validity, rule-by-rule correctability and zero maintenance surface. None of those reasons were about cost.
+
+**2. Proof of concept.** Mean-shift at full sensor resolution took minutes; at a 1300 px working width, seconds. Committed to a CLI, not a service, and to the client's 19 sample photos as the fixed regression set. Every quality round from here on regenerated all 19 and diffed. (The "minutes versus seconds" is the specification's wording, not a benchmark.)
+
+**3. First palette.** Naive nearest-paint matching let several colours land on the same pot: a "30-colour kit" delivered 22. Introduced one-paint-per-pot and priority slot allocation (eyes, mouth, skin, shape, background). Dropped easy/medium/hard in the same period — "easy" delivered 24 paints and varied 36–81% in region count across five photos.
+
+**4. Faces and skin, three versions each.** Haar cascade found faces in foliage; replaced with YuNet. Skin went from a face ellipse (counted hair and background as skin) to Mahalanobis in the (a\*, b\*) plane (called blonde hair skin, yellowing clusters by +6.9°) to `skin_core`, re-checked against the person's own face sample. Contamination 36.4° → 5.0°.
+
+**5. The three-round mistake — review round 5 to 8.** Raised the face threshold 0.6 → 0.85 on a narrow sample. A close portrait lost its face and ran as an animal for three rounds; the `no_face` flag was read as information. Root cause: YuNet confidence is not monotonic in scale (0.58 for two faces at 1300 px, 0.95 at 320 px). Fix was a running strategy — fixed widths, four orientations, per-orientation thresholds — not a better model.
+
+**6. Choosing the reference.** Stopped measuring against taste. Normalised the shop's own sold canvases: 1763 regions average against our 1142. Our `MAX_REGIONS` ceiling of 2200 was the invented constraint holding us at 65%. Raised to 4500 → 0.98×. The same measurement killed the "they paint with all 806 colours" theory: 95% of their pixels are 19–28 colours; the rest was antialiasing. Fix was a screen-side soften, not more paint.
+
+**7. Paintability, four levels deep.** Area filter, then thickness, then compactness, then the realisation that thickness judged a region by its widest point. Replaced discard-by-region with a morphological opening that trims the unpaintable part of every region. A sliver-merge deadlock was found from the number 54 repeating for eight rounds.
+
+**8. Thin line, exposed defects.** Matching the client's 0.10 mm outline revealed every shared edge drawn twice. Rewrote tracing on the inter-pixel grid: 225,341 segments, zero duplicates, ~25× faster as a by-product. Taubin over Laplacian, measured: enclosed area −0.10%.
+
+**9. Colour space, corrected late.** OpenCV's 8-bit LAB had been weighting lightness against hue in every distance for months. Switched to true CIELAB, added hue-weighted matching (2.2×) and the skin sub-inventory. Skin off-scale on the worst sample: 19.3% → 0.0%.
+
+**10. Two things built, made to work, then deleted.** Colour correction: a control experiment against two systems that do no correction showed ours drifting cold. Removed; the photo is the reference. Eye module: worked (24/24 eyes on a group photo), then painted a black rectangle on spectacles. Replaced with up-weighting the eye region in the shared fit — a structural guarantee, not a post-hoc overwrite.
+
+**11. Client's hypothesis, refuted.** "Would a bigger box fix the green skin?" Measured green excess got *worse* with more paints (4.91 / 4.44 / 6.02 pp at 30/39/48) because the fill-in path used plain nearest-neighbour. Fixed the metric: 0.64 / 0.53 / 1.80.
+
+**12. Service layer.** FastAPI, long-lived workers (model reload costs 9 s), jobs as directories. Measured rather than assumed: `future.cancel()` does not stop a running job; memory is the ONNX arena, not image size; eight workers on ten cores gave 3.2×, not 8×. Revised my own capacity estimate from 160 to ~105 jobs/hour.
+
+**13. Handover.** Control panel with 86 parameters, guarded by a golden-file check: 57/57 runs byte-identical. Delivered 26 days into a three-month plan.
+
+What the sequence shows: the model choice was made once, at the start, and held. Almost everything else was decided twice.
+
+## 3. What I did not build
 
 **No generative model, and no model training.** To be precise, because "no AI" would be inaccurate: the pipeline contains two small discriminative models, and both only *recognise*, neither draws anything. U²-Net separates the subject from the background; YuNet locates faces. Every decision that shapes the output is classical image processing. Nothing is generated, nothing is hallucinated, and the same photograph with the same settings produces byte-identical output every time. No GPU is required.
 
@@ -57,7 +92,7 @@ That was the architectural decision, and three constraints forced it. The output
 
 **No detail level chosen by the system.** Three versions are produced and the customer picks. Detail is a taste-and-budget trade-off belonging to the person buying the painting.
 
-## 3. The problems that actually took the time
+## 4. The problems that actually took the time
 
 None of the hard problems were the ones I expected. All four below cost days and none of them were about model accuracy.
 
@@ -89,7 +124,7 @@ None of the hard problems were the ones I expected. All four below cost days and
 
 **Hue-weighted matching, because equal ΔE is not equal error.** Plain CIELAB distance treats a hue error and a lightness error as equally bad; the eye does not. Skin is read by its hue, and a dozen degrees turns a warm brown into olive. Measured case: a selected paint sat at **79° against the photograph's 63°**, with perfect lightness, chosen only because the two better paints were already assigned and the substitution looked cheap at 3.2 ΔE. A hue weight of 2.2 makes that trade honest. Skin additionally gets its own shelf: measured across every sample with faces, real skin sits between roughly 11° and 68° hue and never below chroma 10, so paints in that range form a sub-inventory and a skin-coloured cluster is restricted to it. The rule binds on the cluster's own colour rather than the mask, which also catches skin the mask missed, the grey patches on arms that were not in the photo. Skin painted off the scale fell from **19.3% to 0.0%** on the worst sample.
 
-## 4. How I knew it worked
+## 5. How I knew it worked
 
 **The first decision was what to measure against, and it was not taste.** The obvious benchmark for "is this good enough" is a subjective judgment, or an invented quality target. I used neither. The shop already produces these canvases by hand and sells them, so their own delivered output is a measurable reference rather than an opinion. Normalised for resolution and counting only regions above our own paintability floor, their canvases average **1763 regions; ours started at 1142**. We were at 65% of a real, sold product. That number explained a review comment that had been returning for rounds ("the background could be more detailed") and located the cause precisely: our `MAX_REGIONS` ceiling of 2200 was an invented constraint that held us below the shipping product. Raised to 4500, our average became 1800. **0.98× theirs**.
 
@@ -117,7 +152,7 @@ None of the hard problems were the ones I expected. All four below cost days and
 
 **Honest limits.** Monochrome and near-monochrome photographs remain the weakest category, when the source has little chromatic range, a discrete palette has little to work with. They were brought to acceptable, not good.
 
-## 5. Running it in production
+## 6. Running it in production
 
 The pipeline began as a CLI and now also runs as a service: a FastAPI application with a process pool, a file-based job store, and a control panel for tuning parameters. The API does not execute the pipeline inside the request, it validates, converts HEIC, applies EXIF rotation, opens a job directory and returns a job id immediately, because a 45-90 second HTTP request would time out at nginx and at the caller. A separate worker process runs the job; the caller polls.
 
@@ -158,14 +193,14 @@ The practical consequence: **do not set the worker count equal to the core count
 
 *These measurements were taken on a development machine with heterogeneous cores. The curve will differ on x86 and must be re-measured on the first production host before the worker count is fixed.*
 
-## 6. Cost
+## 7. Cost
 
 - **Team time per order: ~1 hour → ~5 minutes.** Six manual touchpoints reduced to one, logistics assembling the order.
 - **Marginal cost per image: effectively zero.** No inference billing, no API calls. The pipeline is CPU time on a VPS.
 - **Two real speedups, both by-products of quality fixes rather than performance work.** The region-merging loop went from 171 s to 7 s on its worst case by operating on per-component bounding boxes instead of the whole image, and boundary tracing became roughly 25× faster (to 0.12 s) by following boundaries on the inter-pixel grid in a single pass instead of scanning the image once per palette entry. The second was a side effect of eliminating double lines where two colours meet.
 - **Honest note: this project was never profiled.** There is no cProfile, line_profiler or pyinstrument anywhere in the repository, and no commit in its history is about speed. The only timing recorded during development is total elapsed time per job. The breakdowns above were measured afterwards, deliberately, when sizing the service.
 
-## 7. What I would do differently
+## 8. What I would do differently
 
 **Profile before optimising, not after.** Both speedups above were accidents of quality work. That they were large suggests there is more, and I currently could not say where without measuring.
 
