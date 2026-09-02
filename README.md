@@ -34,7 +34,7 @@ The full platform around the pipeline in study 01, built solo from zero: candida
 
 ---
 
-**Reading order.** They're numbered by relevance rather than chronology, and each stands alone. If you read one, read 01. If you read two, read 03 as well — it is the one where the answer was not to use a model. 01 and 04 are two halves of the same system: the model layer and the product built around it.
+**Reading order.** They're numbered by relevance rather than chronology, and each stands alone. If you read one, read 01. If you read two, read 03 as well — it is the one where the answer was not to use a generative model. 01 and 04 are two halves of the same system: the model layer and the product built around it.
 
 ---
 
