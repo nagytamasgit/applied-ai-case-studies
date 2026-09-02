@@ -20,9 +20,9 @@ An autonomous voice agent handling ~1,000 live property enquiry calls a month, w
 
 *Demonstrates:* building an evaluation harness rather than inheriting one; A/B testing conversational agents with a synthetic caller; treating model drift as a permanent condition to be managed rather than a bug to be fixed.
 
-### [03 — When the Right Answer Isn't a Model: A Deterministic Image Pipeline](03-deterministic-image-pipeline.md)
+### [03 — When the Right Answer Isn't a Generative Model: A Deterministic Image Pipeline](03-deterministic-image-pipeline.md)
 
-Converting customer photographs into paintable images against a fixed palette of 806 real paints, selecting the paints that physically ship in the box. Pure Python, no model of any kind.
+Converting customer photographs into paintable, numbered templates against a fixed palette of 806 real paints, selecting the paints that physically ship in the box. Classical Python image processing with two small discriminative models for perception — no generative model anywhere.
 
 *Demonstrates:* recognising when a generative approach is the wrong tool; expert-knowledge extraction at scale (2,000+ reviewed images); reducing a six-touchpoint manual process to one.
 
