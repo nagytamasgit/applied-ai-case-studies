@@ -24,7 +24,7 @@ An autonomous voice agent handling ~1,000 live property enquiry calls a month, w
 
 Converting customer photographs into paintable, numbered templates against a fixed palette of 806 real paints, selecting the paints that physically ship in the box. Classical Python image processing with two small discriminative models for perception — no generative model anywhere.
 
-*Demonstrates:* recognising when a generative approach is the wrong tool; expert-knowledge extraction at scale (2,000+ reviewed images); reducing a six-touchpoint manual process to one.
+*Demonstrates:* recognising when a generative approach is the wrong tool; expert-knowledge extraction at scale (2,000+ reviewed images); reducing a six-touchpoint manual process to one; thirteen decisions in sequence, most of them reversals forced by a measurement.
 
 ### [04 — The Product Around the Model: OmotenashiJobs.jp End to End](04-omotenashijobs-product.md)
 
@@ -34,7 +34,7 @@ The full platform around the pipeline in study 01, built solo from zero: candida
 
 ---
 
-**Reading order.** They're numbered by relevance rather than chronology, and each stands alone. If you read one, read 01. If you read two, read 03 as well — it is the one where the answer was not to use a generative model. 01 and 04 are two halves of the same system: the model layer and the product built around it.
+**Reading order.** They're numbered by relevance rather than chronology, and each stands alone. If you read one, read 01. If you read two, read 03 as well — it is the one where the answer was not to use a generative model, and it is deliberately the deep one: the other three are written to the length a hiring reader has; 03 goes to the depth a technical reviewer would want, including the decisions that were reversed and what reversed them. 01 and 04 are two halves of the same system: the model layer and the product built around it.
 
 ---
 
