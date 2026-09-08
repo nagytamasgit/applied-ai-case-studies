@@ -1,7 +1,7 @@
 # Retrieval That Works in English and Fails in Hungarian and Japanese
 
-**Project:** polyglot-retrieval-eval — an open, reproducible retrieval benchmark. [Code, corpus and full results](https://github.com/nagytamasgit/polyglot-retrieval-eval)
-**Status:** Complete; corpus, 141 labels, raw JSON results and generated tables all public
+**Project:** polyglot-retrieval-eval — a reproducible retrieval benchmark (private repo; source, corpus and results available on request)
+**Status:** Complete; corpus, 141 labels, raw JSON results and generated tables all committed and reproducible from a clone
 **Role:** Sole author
 **Stack:** Python 3.11. `sentence-transformers` (`intfloat/e5-base-v2`, `intfloat/multilingual-e5-base`), reranker `BAAI/bge-reranker-v2-m3`, PyTorch (CPU), SudachiPy, Snowball stemmers. BM25, Reciprocal Rank Fusion and every metric implemented from scratch on the standard library.
 
@@ -13,7 +13,7 @@ A controlled experiment that runs one retrieval pipeline over the *same* text in
 
 Retrieval stacks are built and tuned in English, then pointed at multilingual content on the quiet assumption that behaviour transfers. "Retrieval is worse in other languages" is folklore that gets repeated and rarely measured on parallel text, and almost never decomposed into *which* part fails. That decomposition is the whole value: "Japanese retrieval is worse" is not actionable, whereas "naive BM25 scores zero on Japanese because it cannot find word boundaries, and a Japanese tokenizer recovers it" tells you exactly what to change.
 
-This is a personal project rather than client work, and that is deliberate: it is the one artifact in this portfolio a reader can clone and reproduce end to end in an afternoon.
+This is a personal project rather than client work, and it is built to be reproduced end to end: given the repository, a cold clone regenerates every number in an afternoon. The source is kept private for now — I'm happy to arrange a walkthrough or read-only access on request (nagytmas@gmail.com).
 
 ## 2. The instrument
 
@@ -62,4 +62,8 @@ The honest limits, stated before a reader finds them: the labels are drafted by 
 
 ## 7. What this is and is not
 
-It is a diagnostic benchmark, not a product: retrieval only, no generation, no UI, no agent. Its value is the decomposition — pinning each failure to a component and a fix — and the fact that a cold clone reproduces every number. The one takeaway I would hand someone building RAG for non-English content: the English defaults degrade quietly and your offline metrics will not warn you unless you evaluate in the target language, with a multilingual model and language-aware tokenization, before you ship.
+It is a diagnostic benchmark, not a product: retrieval only, no generation, no UI, no agent. Its value is the decomposition — pinning each failure to a component and a fix — and that every number is reproducible from the committed corpus and results. The one takeaway I would hand someone building RAG for non-English content: the English defaults degrade quietly and your offline metrics will not warn you unless you evaluate in the target language, with a multilingual model and language-aware tokenization, before you ship.
+
+---
+
+**Request a demo or read-only access to the source:** [nagytmas@gmail.com](mailto:nagytmas@gmail.com)
