@@ -32,9 +32,15 @@ The full platform around the pipeline in study 01, built solo from zero: candida
 
 *Demonstrates:* full-stack AI product engineering — the places where model output meets a user interface; rendering a legal constraint as a UI design; killing a revenue feature on legality grounds.
 
+### [05 — Retrieval That Works in English and Fails in Hungarian and Japanese: A Multilingual RAG Benchmark](05-polyglot-retrieval-eval.md)
+
+A controlled retrieval benchmark: the same legal text in English, Hungarian and Japanese, run through six retrievers, measuring how far accuracy drops off English and which component causes each drop. English-tuned dense retrieval falls from recall@5 0.71 to 0.35 (HU) and 0.21 (JA); a multilingual model, a language-aware tokenizer and a reranker bring all three back near parity. Python, sentence-transformers, PyTorch, SudachiPy; BM25 and RRF from scratch.
+
+*Demonstrates:* designing a retrieval evaluation from corpus to metrics with no inherited harness; decomposing a failure into the component responsible rather than a single score; reporting the result that contradicts common advice (RRF fusion lost here), and the limitations, plainly. The one study whose code and every number a reader can clone and reproduce.
+
 ---
 
-**Reading order.** They're numbered by relevance rather than chronology, and each stands alone. If you read one, read 01. If you read two, read 03 as well — it is the one where the answer was not to use a generative model, and it is deliberately the deep one: the other three are written to the length a hiring reader has; 03 goes to the depth a technical reviewer would want, including the decisions that were reversed and what reversed them. 01 and 04 are two halves of the same system: the model layer and the product built around it.
+**Reading order.** They're numbered by relevance rather than chronology, and each stands alone. If you read one, read 01. If you read two, read 03 as well — it is the one where the answer was not to use a generative model, and it is deliberately the deep one: the other three are written to the length a hiring reader has; 03 goes to the depth a technical reviewer would want, including the decisions that were reversed and what reversed them. 01 and 04 are two halves of the same system: the model layer and the product built around it. 05 is the shortest path to running my code yourself: it is open source and reproduces end to end.
 
 ---
 
